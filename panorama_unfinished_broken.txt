@@ -1,0 +1,496 @@
+{$CLEO .cs}
+0000:
+0661: NOP "created by ..."
+script_name "Hello2"
+wait 0
+
+
+//03BC: $SPHERE1 = create_sphere_at 0 0 0 radius 1.0
+//0A40: $ENTRANCE1 = create_entrance_marker_at 0 0 0 color 14
+
+
+$POINTER=0
+
+$MEX=0.0
+$MEY=0.0
+$MEZ=0.0
+
+$REX=0.0
+$REY=0.0
+$REZ=0.0
+
+$FEX=0.0
+$FEY=0.0
+$FEZ=0.0
+
+$FOV=10.0
+
+while true
+if
+0ab0: key_pressed 49 true
+then
+gosub @make_beep
+end
+
+if
+0ab0: key_pressed 50 true
+then
+gosub @jump_to_me
+end
+
+if
+0ab0: key_pressed 51 true
+then
+gosub @set_cam_and_rot
+end
+
+// make rotation
+if
+0ab0: key_pressed 55 true
+then
+gosub @create_pano
+end
+
+
+// change values
+if
+0ab0: key_pressed 53 true
+then
+gosub @pointer_next
+end
+if
+0ab0: key_pressed 48 true
+then
+gosub @pointer_set_0
+end
+
+if
+0ab0: key_pressed 56 true
+then
+gosub @pointer_dec
+end
+
+if
+0ab0: key_pressed 57 true
+then
+gosub @pointer_inc
+end
+
+
+wait 100
+end
+
+
+0A93: terminate_this_custom_script
+
+
+:make_beep
+
+0209: 1@ = random_int_in_ranges 0 10
+set_weather 1@
+
+
+03BD: destroy_sphere $SPHERE1
+0A41: destroy_entrance_marker $ENTRANCE1
+00A0: store_actor $PLAYER_ACTOR position_to 0@ 1@ 2@
+//02A7: 6@ = create_icon_marker_and_sphere 35 at 0@ 1@ 2@
+//0AED: 0@v = float 0@ to_string_format "Info: %.15g last"
+//0AD3: 0@v = string_format "pos:%.3fx%.3fx%.3f" 0@ 1@ 2@
+0ACE: show_formatted_text_box "pos:%.15g %.15g %.15g" 0@ 1@ 2@ time 1000
+
+03BC: $SPHERE1 = create_sphere_at 0@ 1@ 2@ radius 1.0
+0A40: $ENTRANCE1 = create_entrance_marker_at 0@ 1@ 2@ color 14
+
+
+00A0: store_actor $PLAYER_ACTOR position_to 0@ 1@ 2@
+Camera.SetPosition(0@,1@,2@,0@,1@,2@)
+Camera.PointAt(0@,1@,2@, 2)
+
+
+
+//0ACD: show_text_highpriority "Hello World!" time 500
+//0ACD: show_text_highpriority 0@v time 500
+//018C: play_sound  1159 at 0@ 1@ 2@
+018C: play_sound  1083 at 0@ 1@ 2@
+
+return
+
+
+:jump_to_me
+00A1: put_actor $PLAYER_ACTOR at $MEX $MEY $MEZ
+018C: play_sound 1095 at $MEX $MEY $MEZ
+
+return
+
+:set_cam_and_rot
+//0930: lock_camera_position 1
+//0E60: set_camera_control 1@ 2@
+//0936: set_camera 3@ 4@ 5@ position_to 0@ 1@ 10@ time 9@ drop_mode 1
+//092F: lock_camera_target_point 1
+
+//015F: set_camera_position $MEX $MEY $MEZ rotation $REX $REY $REZ
+
+04E4: refresh_game_renderer_at $MEX $MEY
+//Camera.SetPosition($MEX $MEY $MEZ, $REX $REY $REZ)
+//Camera.PointAt($FEX $FEY $FEZ, 2)
+
+
+
+//0936: set_camera 2358.656 -1246.348 28.7884 position_to 2358.656 -1246.348 28.7884 time 7000 smooth_transition 1
+
+
+0090: $FOV1 = float $FOV to_integer
+//0924: enable_screen_darkness $FOV1 with_value 50
+0931: lock_camera_zoom 1
+0922: set_camera_zoom_from $FOV to $FOV timelimit 5 smooth_transition 1
+
+
+0ACE: show_formatted_text_box "FOV:%.15g" $FOV time 1000
+
+
+
+0209: 1@ = random_int_in_ranges 0 10
+set_weather 1@
+return
+
+
+
+
+:pointer_next
+0209: 1@ = random_int_in_ranges 0 10
+set_weather 1@
+0008: $POINTER += 1
+if
+0038:   $POINTER == 10
+then 
+$POINTER=0
+end
+
+008F: 1@ = integer $POINTER to_float
+0ACE: show_formatted_text_box "pointer:%.15g" 1@ time 1000
+
+return
+
+
+:pointer_set_0
+if
+0038:   $POINTER == 0
+then
+$MEX=0.0
+end
+
+if
+0038:   $POINTER == 1
+then 
+$MEY=0.0
+end
+
+if
+0038:   $POINTER == 2
+then 
+$MEZ=0.0
+end
+
+if
+0038:   $POINTER == 3
+then 
+$REX=0.0
+end
+
+if
+0038:   $POINTER == 4
+then 
+$REY=0.0
+end
+
+if
+0038:   $POINTER == 5
+then 
+$REZ=0.0
+end
+
+if
+0038:   $POINTER == 6
+then 
+$FEX=0.0
+end
+
+if
+0038:   $POINTER == 7
+then 
+$FEY=0.0
+end
+
+if
+0038:   $POINTER == 8
+then 
+$FEZ=0.0
+end
+
+if
+0038:   $POINTER == 9
+then 
+$FOV=80.0
+end
+
+gosub @set_cam_and_rot
+return
+
+:pointer_dec
+if
+0038:   $POINTER == 0
+then 
+000D: $MEX -= 10.0
+end
+
+if
+0038:   $POINTER == 1
+then 
+000D: $MEY -= 10.0
+end
+
+if
+0038:   $POINTER == 2
+then 
+000D: $MEZ -= 10.0
+end
+
+if
+0038:   $POINTER == 3
+then 
+000D: $REX -= 10.0
+end
+
+if
+0038:   $POINTER == 4
+then 
+000D: $REY -= 10.0
+end
+
+if
+0038:   $POINTER == 5
+then 
+000D: $REZ -= 10.0
+end
+
+if
+0038:   $POINTER == 6
+then 
+000D: $FEX -= 10.0
+end
+
+if
+0038:   $POINTER == 7
+then 
+000D: $FEY -= 10.0
+end
+
+if
+0038:   $POINTER == 8
+then 
+000D: $FEZ -= 10.0
+end
+
+if
+0038:   $POINTER == 9
+then 
+000D: $FOV -= 9.0
+end
+
+gosub @set_cam_and_rot
+return
+
+
+:pointer_inc
+if
+0038:   $POINTER == 0
+then 
+0009: $MEX += 10.0
+end
+
+if
+0038:   $POINTER == 1
+then 
+0009: $MEY += 10.0
+end
+
+if
+0038:   $POINTER == 2
+then 
+0009: $MEZ += 10.0
+end
+
+if
+0038:   $POINTER == 3
+then 
+0009: $REX += 10.0
+end
+
+if
+0038:   $POINTER == 4
+then 
+0009: $REY += 10.0
+end
+
+if
+0038:   $POINTER == 5
+then 
+0009: $REZ += 10.0
+end
+
+if
+0038:   $POINTER == 6
+then 
+0009: $FEX += 10.0
+end
+
+if
+0038:   $POINTER == 7
+then 
+0009: $FEY += 10.0
+end
+
+if
+0038:   $POINTER == 8
+then 
+0009: $FEZ += 10.0
+end
+
+if
+0038:   $POINTER == 9
+then 
+0009: $FOV += 10.0
+end
+
+gosub @set_cam_and_rot
+return
+
+
+:create_pano
+
+
+
+//$FOV = 50.0
+//$cols = 22.0
+//$rows = 11.0
+/*
+$FOV = 20.0
+$cols = 54.0
+$rows = 27.0
+*/
+
+$FOV = 30.0
+$cols = 36.0
+$rows = 18.0
+
+
+$totalFrames = 0
+
+//0011: $cols *= 3.0
+//0011: $rows *= 3.0
+
+0086: $totalFrames_float = $cols
+0011: $totalFrames_float *= $cols
+
+$sphereRadius = 5.0
+
+0090: $totalFrames = float $totalFrames_float to_integer
+0008: $totalFrames += 1
+008F: $totalFrames_float = integer $totalFrames to_float
+
+$rots_per_y = 178.0
+$rots_per_x = 360.0
+0011: $rots_per_x *= $rows
+
+
+// disable hud
+0826: enable_hud 0
+0581: enable_radar 0
+
+0@=361152
+//&0(0@,1i) = 0
+0@=361157
+//&0(0@,1i) = 0
+
+//$fh = File.Open("panolog.txt","wt")
+//0A9A: $hFILE = open_file "panolog.txt" mode "wt"
+
+
+
+00A0: store_actor $PLAYER_ACTOR position_to $MEX $MEY $MEZ
+0009: $MEZ += 10.0
+
+//0ACE: show_formatted_text_box "me:%.15g x %.15g x %.15g" $MEX $MEY $MEZ time 1000
+
+$yrotth = 89.0
+
+
+04E4: refresh_game_renderer_at $MEX $MEY
+0922: set_camera_zoom_from $FOV to $FOV timelimit 5 smooth_transition 1
+0931: lock_camera_zoom 1
+
+for $q = 200 to $totalFrames
+008F: $qq = integer $q to_float
+
+0086: $xrotth = $rots_per_x
+0011: $xrotth *= $qq
+0071: $xrotth /= $totalFrames_float
+	
+0086: $yrotth1 = $rots_per_y
+0011: $yrotth1 *= $qq
+0071: $yrotth1 /= $totalFrames_float
+
+0011: $yrotth *= 0.0
+0009: $yrotth += 89.0
+0061: $yrotth -= $yrotth1
+	
+02F7: $radius1 = cosine $yrotth 
+0011: $radius1 *= $sphereRadius
+
+02F6: $FEZ = sine $yrotth
+0011: $FEZ *= $sphereRadius
+02F6: $FEX = sine $xrotth
+02F7: $FEY = cosine $xrotth
+0011: $FEX *= $radius1
+0011: $FEY *= $radius1
+
+0059: $FEX += $MEX
+0059: $FEY += $MEY
+0059: $FEZ += $MEZ
+0ACE: show_formatted_text_box "frame:%.15g / %.15g" $qq $totalFrames_float time 100
+0924: enable_screen_darkness 1 with_value 300
+018C: play_sound  1084 at 0@ 1@ 2@
+03BD: destroy_sphere $SPHERE1
+0A41: destroy_entrance_marker $ENTRANCE1
+03BC: $SPHERE1 = create_sphere_at $MEX $MEY $MEZ radius 1.0
+0A40: $ENTRANCE1 = create_entrance_marker_at $MEX $MEY $MEZ color 14
+
+//0AD9: write_formatted_text "%.15g: %.15g %.15g %.15g %.15g %.15g %.15g" in_file $fh $qq $MEX $MEY $MEZ $MEX $MEY $MEZ 
+
+
+Camera.SetPosition($MEX $MEY $MEZ, $REX $REY $REZ)
+Camera.PointAt($FEX $FEY $FEZ, 2)
+wait 100
+015D: set_gamespeed 0.03
+018C: play_sound  1083 at 0@ 1@ 2@
+0924: enable_screen_darkness 0 with_value 0
+
+wait 1
+//0A1E: dump_screen 1
+//wait 1111
+
+015D: set_gamespeed 1.0
+
+end
+
+//0A9B: close_file $fh
+
+
+0924: enable_screen_darkness 0 with_value 0
+015D: set_gamespeed 1.0
+0826: enable_hud 1
+0581: enable_radar 1
+ 
+return
+
+
