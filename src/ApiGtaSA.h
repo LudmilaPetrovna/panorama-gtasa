@@ -31,11 +31,13 @@ void flyTo(float tx, float ty, float tz, float heading);
 void setCameraFromToFov(float sx, float sy, float sz, float tx, float ty, float tz, float fov);
 void cpedSetHeading(void *cped, float angle);
 void setAspectRatio(float aspect);
-void setWindynessForCurrentWeater(float val);
+void setGameFPSLimit(int fps);
+void setWindynessForCurrentWeather(float val);
 void setDrawingDistance(float dist);
+void waitNFrames(int n);
 
 
-
+// game functions
 extern void addTwoStars();
 extern void MessageJumpQ(char *text, int time, unsigned short flag, bool addToPreviousBrief);
 extern void forceWeatherNow(short weatherType);
@@ -56,6 +58,7 @@ extern unsigned char* sunCoreRed;
 extern float *CRenderer_ms_lodDistScale;
 extern float *CRenderer_ms_fCameraHeading;
 
+// don't work for me
 extern void __cdecl JPegCompressScreenToFile(void *rwcamera, const char *filename);
 
 extern float *weatherInterpolationValue;
@@ -68,6 +71,11 @@ extern char *cameraFovLock;
 extern int *brightness; // by CE
 extern int *darkness;
 extern char *darknessEnable;
+
+extern int *LastScreenWidth;
+extern int *LastScreenHeight;
+extern int *screenHudMenuWidth;
+extern int *screenHudMenuHeight;
 
 extern float *timeScale;
 extern float *timeStep;

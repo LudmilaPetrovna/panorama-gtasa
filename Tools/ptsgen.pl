@@ -29,17 +29,13 @@ open(ii,"pano.pto");
 while(<ii>){
 if(/^i f0 w(\d+) h(\d+) r([\d\.\-]+) p([\d\.\-]+) y([\d\.\-]+) v([\d\.\-]+) n\"([^\"]+)\"/){
 ($width,$height,$roll,$pitch,$yaw,$fov,$filename)=($1,$2,$3,$4,$5,$6,$7);
-$width=1920;
-$height=1080;
-$cwidth=1440;
-$cheight=1080;
 
-$nfile="corrected/".$filename;
-if(!-e($nfile)){
-`ffmpeg -v 0 -i "$filename" -s 1440x1080 -y "$nfile"`;
-}
+#$nfile="corrected/".$filename;
+#if(!-e($nfile)){
+#`ffmpeg -v 0 -i "$filename" -s 1440x1080 -y "$nfile"`;
+#}
 print oo <<AAA;
-#-imgfile $cwidth $cheight "corrected/$filename"
+#-imgfile $width $height "$filename"
 o f0 y$yaw r$roll p$pitch v$fov
 AAA
 

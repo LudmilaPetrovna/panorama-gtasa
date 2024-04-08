@@ -224,14 +224,14 @@ AAA
 
 
 
-
+@colors=(0,3,6,9,12,15,18,30,33,36,40,44);
 
 
 
 
 @fields=map{[split(/\t/,$_,3)]}split(/[\r\n]+/,$cols);
 
-open(ii,"timecyc-orig.dat");
+open(ii,$ARGV[0]||"timecyc-orig.dat");
 open(oo2,">timecyc.dat");
 open(oo,">time.csv");
 print oo join(";",(0..100))."\n";
@@ -248,8 +248,37 @@ next;
 
 print oo join(";",@vals)."\n";
 
-$vals[27]="5000.0";
-$vals[28]="-1000.0";
+$vals[27]="8000.0";
+$vals[28]="0.0";
+
+=pod
+foreach $color_offset(@colorsaa){
+$luma=int(rand()*256);
+
+$vals[$color_offset+0]=$luma;
+$vals[$color_offset+1]=$luma;
+$vals[$color_offset+2]=$luma;
+}
+
+$vals[40]=0;
+$vals[41]=0;
+$vals[42]=0;
+$vals[43]=0;
+
+$vals[44]=0;
+$vals[45]=0;
+$vals[46]=0;
+$vals[47]=0;
+
+
+$vals[51]=rand()*rand()*rand()*100.0;
+=cut
+
+for($q=0;$q<50;$q++){
+if($vals[$q]==int($vals[$q]) && $vals[$q]>=0 && $vals[$q]<256){
+#$vals[$q]=128;
+}
+}
 
 print oo2 join(" ",@vals)."\n";
 

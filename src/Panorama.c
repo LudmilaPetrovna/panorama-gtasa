@@ -8,9 +8,6 @@
 
 #include "ApiGtaSA.h"
 
-int width=128;
-int height=96;
-
 // TODO: add more fun points of game, game is so beautiful!
 typedef struct{
 float x,y,z,heading;
@@ -106,11 +103,9 @@ Sleep(100);
 void createPano(){
 
 
-double fov=125.0;
+double fov=60.0;
 int cols=360.0/fov*3.0+1.0;
 int rows=180.0/fov*3.0+1.0;
-
-//cols*=10;
 
 int totalFrames=cols*rows;
 
@@ -172,14 +167,14 @@ double sphereRadius=10.0;
 double radius1;
 int q;
 
-
-setAspectRatio(1.77777777777777777);
-setWindynessForCurrentWeater(200);
-
+setAspectRatio((double)(*LastScreenWidth)/(*LastScreenHeight));
+setWindynessForCurrentWeather(0);
+setDrawingDistance(8000.0);
 
 // First pass, precache
 *darkness=200;
 *darknessEnable=1;
+setGameFPSLimit(105);
 MessageJumpQ("Creating Panorama, please wait!", 1000, 0, false);
 
 for(q=0;q<200;q+=1){
@@ -204,6 +199,8 @@ Sleep(33);
 // Second pass
 *darkness=0;
 *darknessEnable=0;
+setGameFPSLimit(10);
+
 
 for(q=0;q<totalFrames;q+=1){
 if(GetAsyncKeyState(VK_F7)&1){goto pano_finish;}
@@ -211,7 +208,7 @@ xrotth=(360.0*rows*q/totalFrames)/180.0*M_PI;
 yrotth=(89.0-178.0*q/totalFrames)/180.0*M_PI;
 
 sprintf(framename,"frame-%.7d.png",q);
-fprintf(pto,"i f0 w%d h%d r%f p%f y%f v%f n\"%s\"\n",width,height,0.0,(float)(89.0-178.0*q/totalFrames),(float)(360.0*rows*q/totalFrames),fov,framename);
+fprintf(pto,"i f0 w%d h%d r%f p%f y%f v%f n\"%s\"\n",*LastScreenWidth,*LastScreenHeight,0.0,(float)(89.0-178.0*q/totalFrames),(float)(360.0*rows*q/totalFrames),fov,framename);
 
 radius1=cos(yrotth)*sphereRadius;
 tz=sz+sin(yrotth)*sphereRadius;
@@ -224,7 +221,7 @@ ty=sy+cos(xrotth)*radius1;
 *clockSeconds=panoClockSeconds;
 
 // restore/refresh weather state, like was in start
-*weatherInterpolationValue=panoWeatherInterpolator;
+*weatherInterpolationValue=0;
 *weatherForcedType=panoWeatherForced;
 *weatherNewType=panoWeatherNewType;
 *weatherOldType=panoWeatherOldType;
@@ -232,6 +229,10 @@ ty=sy+cos(xrotth)*radius1;
 // Pause game time, we don't want any movements during screenshot session.
 *timeScale=0.0;
 *timeStep=0.0;
+
+// Remove pause (if any), let's game tick again
+*codePause=0;
+*userPause=0;
 
 setCameraFromToFov(sx,sy,sz,tx,ty,tz,fov);
 
@@ -243,7 +244,7 @@ setCameraFromToFov(sx,sy,sz,tx,ty,tz,fov);
 //*take_photo=1;
 
 // Wait for new redraw cycle
-Sleep(80);
+waitNFrames(2);
 
 // Stop time even more, setting game to pause while creating screenshot
 *codePause=1;
@@ -263,9 +264,6 @@ waitForFile(path);
 //ShellExecute(NULL,"open","ffmpeg",cmd,NULL,SW_HIDE);
 //DeleteFile(path);
 
-// Remove pause, let's game tick again
-*codePause=0;
-*userPause=0;
 }
 
 // Play finish sounds
@@ -300,6 +298,10 @@ free(camState);
 
 // Restore audio, if any
 setVolume(64);
+
+// Restore FPS
+setGameFPSLimit(105);
+
 
 // TODO: exit game at finish (menu option)
 
@@ -429,22 +431,8 @@ if(GetAsyncKeyState(VK_F11)&1){
 *sunCoreGreen=drand()*255.0;
 *sunCoreRed=drand()*255.0;*/
 
-
-
 //MessageJumpQ(tmp, 1000, 0, false);
 
-char filename[256];
-static int screen_id=0;
-
-sprintf(filename,"T:\\GTA-trains\\Screenshots\\screenshot-%d.jpg",screen_id++);
-JPegCompressScreenToFile((void*)(0xC17038+4), filename);
-MessageJumpQ(filename, 3000, 0, false);
-
-continue;
-
-setAspectRatio(1.77777777777777777);
-setWindynessForCurrentWeater(200);
-setDrawingDistance(0.01);
 
 char *sunBlockedByClouds=(char *)0xC3E030;
 int *sunChangeBrightnessImmediately=(int*)0xC3E034;

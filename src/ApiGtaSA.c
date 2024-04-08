@@ -60,6 +60,11 @@ CCamera *theCamera=(CCamera*)0xB6F028;
 float *GAME_GRAVITY=(float*)0x863984;
 
 
+int *LastScreenWidth=(int*)0xc9bee4;
+int *LastScreenHeight=(int*)0xc9bee8;
+
+int *screenHudMenuWidth=(int*)0xc17044;
+int *screenHudMenuHeight=(int*)0xc17048;
 
 void waitNFrames(int n){
 int to=n+(*CTimer_m_FrameCounter);
@@ -75,7 +80,7 @@ void setDrawingDistance(float dist){
 }
 
 
-void setWindynessForCurrentWeater(float val){
+void setWindynessForCurrentWeather(float val){
 if(*weatherForcedType>=0){
 weatherWindynessForWeatherID[*weatherForcedType]=val;
 }
@@ -101,6 +106,14 @@ Patch them all!!!
 *(float*)(0x85F09C)=aspect;
 MessageJumpQ("Aspect patched", 1000, 0, false);
 }
+
+void setGameFPSLimit(int fps){
+// frame limits
+// use 105 for smooth game
+*(int*)0x619626=fps; // from SA Limits Ajuster
+*(int*)0xC1704C=fps;
+}
+
 
 void cpedSetHeading(void *cped, float angle){ // -M_PI..+M_PI
 CPlaceable__SetHeading(cped,angle);
