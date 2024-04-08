@@ -29,6 +29,11 @@ void playSoundId(int id, CVector *pos);
 void rollTime();
 void flyTo(float tx, float ty, float tz, float heading);
 void setCameraFromToFov(float sx, float sy, float sz, float tx, float ty, float tz, float fov);
+void cpedSetHeading(void *cped, float angle);
+void setAspectRatio(float aspect);
+void setWindynessForCurrentWeater(float val);
+void setDrawingDistance(float dist);
+
 
 
 extern void addTwoStars();
@@ -37,12 +42,21 @@ extern void forceWeatherNow(short weatherType);
 extern void __thiscall reportMissionAudioEvent(void *t, int id, CVector *coords);
 extern void __thiscall setEffectsMasterVolume(void *t, char volume);
 
+void __thiscall CPlaceable__SetHeading(CPlaceable *this, float angle);
+float __thiscall CPlaceable__GetHeading();
+double __cdecl FindPlayerHeading(int playerId);
+
 extern __cdecl void requestCollision(const CVector *vec, int where);
 extern __cdecl float findGroundZForCoord(float x, float y);
 
 extern unsigned char* sunCoreBlue;
 extern unsigned char* sunCoreGreen;
 extern unsigned char* sunCoreRed;
+
+extern float *CRenderer_ms_lodDistScale;
+extern float *CRenderer_ms_fCameraHeading;
+
+extern void __cdecl JPegCompressScreenToFile(void *rwcamera, const char *filename);
 
 extern float *weatherInterpolationValue;
 extern short *weatherForcedType;

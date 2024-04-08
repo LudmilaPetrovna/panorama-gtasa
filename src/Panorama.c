@@ -119,7 +119,6 @@ char framename[32];
 void *player_data=(void*)(0xB7CD98);
 void *cped=*(void**)(player_data+0);
 void *cped_xyz=*(void**)(cped+0x14); // matrix???
-
 float player_x=*(float*)(cped_xyz+0x30);
 float player_y=*(float*)(cped_xyz+0x34);
 float player_z=*(float*)(cped_xyz+0x38);
@@ -173,10 +172,14 @@ double sphereRadius=10.0;
 double radius1;
 int q;
 
+
+setAspectRatio(1.77777777777777777);
+setWindynessForCurrentWeater(200);
+
+
 // First pass, precache
 *darkness=200;
 *darknessEnable=1;
-
 MessageJumpQ("Creating Panorama, please wait!", 1000, 0, false);
 
 for(q=0;q<200;q+=1){
@@ -304,6 +307,13 @@ setVolume(64);
 }
 
 
+
+
+
+
+
+
+
 DWORD WINAPI MyASIThread(LPVOID lpParam){
 
 while(1){
@@ -398,7 +408,7 @@ places_current++;
 places_current%=places_count;
 //float haveZ=findGroundZForCoord(places[places_current].x,places[places_current].y);
 //requestCollision(&newpos,0xB72914);
-flyTo(places[places_current].x,places[places_current].y,places[places_current].z,0);
+flyTo(places[places_current].x,places[places_current].y,places[places_current].z,places[places_current].heading);
 }
 
 if(GetAsyncKeyState(VK_F9)&1){
@@ -420,6 +430,22 @@ if(GetAsyncKeyState(VK_F11)&1){
 *sunCoreRed=drand()*255.0;*/
 
 
+
+//MessageJumpQ(tmp, 1000, 0, false);
+
+char filename[256];
+static int screen_id=0;
+
+sprintf(filename,"T:\\GTA-trains\\Screenshots\\screenshot-%d.jpg",screen_id++);
+JPegCompressScreenToFile((void*)(0xC17038+4), filename);
+MessageJumpQ(filename, 3000, 0, false);
+
+continue;
+
+setAspectRatio(1.77777777777777777);
+setWindynessForCurrentWeater(200);
+setDrawingDistance(0.01);
+
 char *sunBlockedByClouds=(char *)0xC3E030;
 int *sunChangeBrightnessImmediately=(int*)0xC3E034;
 unsigned int *sunNumCoronas=(unsigned int*)0xC3E038;
@@ -430,8 +456,8 @@ unsigned int *sunMoonSize=(unsigned int *)0x8D4B60;
 *sunChangeBrightnessImmediately=1;
 //*sunNumCoronas=drand()*64.0;
 *sunLightsMult=drand()*20.0;
-sprintf(tmp,"changed, moon:%d",*sunMoonSize);
-MessageJumpQ(tmp, 1000, 0, false);
+sprintf(tmp,"changed, moon:%d, h1:%.3f,h2:%.3f",*sunMoonSize,1.0,2.0);
+//MessageJumpQ(tmp, 1000, 0, false);
 
 float *CTimeCycle_m_BrightnessAddedToAmbientBlue_=(float*)0xB79E30;
 float *CTimeCycle_m_BrightnessAddedToAmbientGreen_=(float*)0xB79E34;
