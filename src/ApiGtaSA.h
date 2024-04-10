@@ -31,6 +31,7 @@ void flyTo(float tx, float ty, float tz, float heading);
 void setCameraFromToFov(float sx, float sy, float sz, float tx, float ty, float tz, float fov);
 void *getPlayerCped();
 void cpedSetHeading(void *cped, float angle);
+void cpedSetVisivility(void *cped, int state);
 void setAspectRatio(float aspect);
 void setGameFPSLimit(int fps);
 void setWindynessForCurrentWeather(float val);

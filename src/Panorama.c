@@ -117,7 +117,7 @@ Sleep(100);
 
 void createPano(){
 
-
+double jumpTo=0.0;
 double fov=60.0;
 int cols=360.0/fov*3.0+1.0;
 int rows=180.0/fov*3.0+1.0;
@@ -133,7 +133,7 @@ float player_x=*(float*)(cped_xyz+0x30);
 float player_y=*(float*)(cped_xyz+0x34);
 float player_z=*(float*)(cped_xyz+0x38);
 
-double sx=player_x,sy=player_y,sz=player_z+10.0;
+double sx=player_x,sy=player_y,sz=player_z+jumpTo;
 double tx=0,ty=0,tz=0;
 
 
@@ -176,6 +176,7 @@ setWindynessForCurrentWeather(0);
 setDrawingDistance(8000.0);
 *CTheScripts__bDisplayHud=0;
 *CHud__bScriptDontDisplayRadar=1;
+cpedSetVisivility(cped, 0);
 
 
 // First pass, precache
@@ -236,12 +237,12 @@ CreateDirectory(path,NULL);
 
 sprintf(path,"%s\\%s\\pano-build.bat",panoRoot,panoName);
 pto=fopen(path,"wt");
-fprintf(pto,"\"V:\\h\\Hugin-2023.0.0-win64\\nona\" -o pano pano.pto");
+fprintf(pto,"\"V:\\h\\Hugin-2023.0.0-win64\\nona\" -o pano-%dx%dx%d pano.pto",(int)player_x,(int)player_y,(int)player_z);
 fclose(pto);
 
 sprintf(path,"%s\\%s\\pano.pto",panoRoot,panoName);
 pto=fopen(path,"wt");
-fprintf(pto,"p w2048 h1024 f2 v360 n\"PNG\" R0 T\"UINT8\"\n");
+fprintf(pto,"p w4096 h2048 f2 v360 n\"PNG\" R0 T\"UINT8\"\n");
 fprintf(pto,"m i6\n");
 
 
@@ -323,6 +324,9 @@ free(camState);
 
 // Restore FPS
 setGameFPSLimit(105);
+
+// Restore Player visibility
+cpedSetVisivility(cped, 1);
 
 // Restore audio, if any
 setVolume(64);
@@ -502,7 +506,12 @@ if(GetAsyncKeyState(VK_F11)&1){
 //MessageJumpQ(tmp, 1000, 0, false);
 *CTheScripts__bDisplayHud^=1;
 *CHud__bScriptDontDisplayRadar^=1;
-continue;
+
+
+void *cped=getPlayerCped();
+*(char *)(cped+0x474)^=2;
+
+
 char *sunBlockedByClouds=(char *)0xC3E030;
 int *sunChangeBrightnessImmediately=(int*)0xC3E034;
 unsigned int *sunNumCoronas=(unsigned int*)0xC3E038;
