@@ -11,11 +11,17 @@
 // TODO: add more fun points of game, game is so beautiful!
 typedef struct{
 float x,y,z,heading;
+int interior;
 }PLACES;
 
 PLACES places[]={
 {1932.6908, -1341.0327, 17.923, 90},
 {1522.7098, -1660.6588, 13.5392, 12},
+{1726.98, -1632.87, 20.21, 183, 0}, // Los Santos Atrium (door bug), before door
+{1726.18, -1641.10, 20.22, 179, 18}, // Los Santos Atrium (door bug), before door
+{2488.91, -1666.91, 13.34, 262, 14}, // Intro screen
+{2215.83, -1731.19, 13.40, 302, 0}, // Ganton Gym
+{-730.2343,494.6384,1371.997,0.0,1}, // liberty city
 {-2400.6841, -1633.3374, 520.8088, 145},
 {-2696.0698, 1933.2408, 217.2739, 204},
 {-2666.7161, 1595.2468, 217.2739, 263},
@@ -40,8 +46,17 @@ PLACES places[]={
 int places_current=0;
 int places_count=sizeof(places)/sizeof(places[0]);
 
+typedef struct{
+char *name;
+int id;
+}NOISE;
 
-
+NOISE noises[]={
+//{"SOUND_EXPLOSION", 1159},
+{"SOUND_SWEETS_HORN", 1147},
+{"SOUND_ROULETTE_ADD_CASH", 1083},
+{"SOUND_ROULETTE_REMOVE_CASH", 1084}
+};
 
 float mex=2083.0;
 float mey=-1263.0;
@@ -123,20 +138,8 @@ double tx=0,ty=0,tz=0;
 
 
 removeTrash();
-sprintf(panoName,"pano-%d-%dx%dx%d",(int)time(0),(int)player_x,(int)player_y,(int)player_z);
-sprintf(path,"%s\\%s",panoRoot,panoName);
-CreateDirectory(path,NULL);
 
-sprintf(path,"%s\\%s\\pano-build.bat",panoRoot,panoName);
-FILE *pto=fopen(path,"wt");
-fprintf(pto,"\"V:\\h\\Hugin-2023.0.0-win64\\nona\" -o pano pano.pto");
-fclose(pto);
-
-sprintf(path,"%s\\%s\\pano.pto",panoRoot,panoName);
-pto=fopen(path,"wt");
-fprintf(pto,"p w2048 h1024 f2 v360 n\"PNG\" R0 T\"UINT8\"\n");
-fprintf(pto,"m i6\n");
-
+FILE *pto=NULL;
 
 
 //sprintf(tmp,"me at: %.3fx%.3fx%.3f",player_x,player_y,player_z);
@@ -166,22 +169,47 @@ double yrotth;
 double sphereRadius=10.0;
 double radius1;
 int q;
+int is_cancelled=0;
 
 setAspectRatio((double)(*LastScreenWidth)/(*LastScreenHeight));
 setWindynessForCurrentWeather(0);
 setDrawingDistance(8000.0);
+*CTheScripts__bDisplayHud=0;
+*CHud__bScriptDontDisplayRadar=1;
+
 
 // First pass, precache
-*darkness=200;
+*darkness=100;
 *darknessEnable=1;
 setGameFPSLimit(105);
 MessageJumpQ("Creating Panorama, please wait!", 1000, 0, false);
 
-for(q=0;q<200;q+=1){
-if(GetAsyncKeyState(VK_F7)&1){goto pano_finish;}
+for(q=0;q<300;q+=1){
+if(GetAsyncKeyState(VK_F7)&1){is_cancelled=1;goto pano_finish;}
 
 xrotth=(360.0*10.0*q/200.0)/180.0*M_PI;
 yrotth=(89.0-178.0*q/200.0)/180.0*M_PI;
+
+radius1=cos(yrotth)*sphereRadius;
+tz=sz+sin(yrotth)*sphereRadius;
+tx=sx+sin(xrotth)*radius1;
+ty=sy+cos(xrotth)*radius1;
+
+*clockHours=panoClockHours;
+*clockMinutes=panoClockMinutes;
+*clockSeconds=panoClockSeconds;
+
+setCameraFromToFov(sx,sy,sz,tx,ty,tz,3.0);
+Sleep(33);
+}
+
+*darkness=200;
+*darknessEnable=1;
+for(q=0;q<300;q+=1){
+if(GetAsyncKeyState(VK_F7)&1){is_cancelled=1;goto pano_finish;}
+
+xrotth=(360.0*10.0*q/300.0)/180.0*M_PI;
+yrotth=(89.0-178.0*q/300.0)/180.0*M_PI;
 
 radius1=cos(yrotth)*sphereRadius;
 tz=sz+sin(yrotth)*sphereRadius;
@@ -196,14 +224,29 @@ setCameraFromToFov(sx,sy,sz,tx,ty,tz,90.0);
 Sleep(33);
 }
 
+
 // Second pass
 *darkness=0;
 *darknessEnable=0;
 setGameFPSLimit(10);
 
+sprintf(panoName,"pano-%d-%dx%dx%d",(int)time(0),(int)player_x,(int)player_y,(int)player_z);
+sprintf(path,"%s\\%s",panoRoot,panoName);
+CreateDirectory(path,NULL);
+
+sprintf(path,"%s\\%s\\pano-build.bat",panoRoot,panoName);
+pto=fopen(path,"wt");
+fprintf(pto,"\"V:\\h\\Hugin-2023.0.0-win64\\nona\" -o pano pano.pto");
+fclose(pto);
+
+sprintf(path,"%s\\%s\\pano.pto",panoRoot,panoName);
+pto=fopen(path,"wt");
+fprintf(pto,"p w2048 h1024 f2 v360 n\"PNG\" R0 T\"UINT8\"\n");
+fprintf(pto,"m i6\n");
+
 
 for(q=0;q<totalFrames;q+=1){
-if(GetAsyncKeyState(VK_F7)&1){goto pano_finish;}
+if(GetAsyncKeyState(VK_F7)&1){is_cancelled=1;goto pano_finish;}
 xrotth=(360.0*rows*q/totalFrames)/180.0*M_PI;
 yrotth=(89.0-178.0*q/totalFrames)/180.0*M_PI;
 
@@ -266,21 +309,23 @@ waitForFile(path);
 
 }
 
-// Play finish sounds
-setVolume(64);
-CVector soundPos;
-soundPos.x=sx;
-soundPos.y=sy;
-soundPos.z=sz;
-for(q=0;q<20;q++){
-playSoundId(1083,&soundPos);
-Sleep(200);
-}
 
 
 pano_finish:
 
+if(pto){
 fclose(pto);
+}
+
+// Restore camera
+memcpy(theCamera,camState,sizeof(CCamera));
+free(camState);
+
+// Restore FPS
+setGameFPSLimit(105);
+
+// Restore audio, if any
+setVolume(64);
 
 // Restore time speed
 *timeScale=1.0;
@@ -292,22 +337,37 @@ fclose(pto);
 *darkness=0;
 *darknessEnable=0;
 
-// Restore camera
-memcpy(theCamera,camState,sizeof(CCamera));
-free(camState);
+// Restore HUD
+*CTheScripts__bDisplayHud=1;
+*CHud__bScriptDontDisplayRadar=0;
 
-// Restore audio, if any
+// Notify user
+if(is_cancelled){
+MessageJumpQ("Panorama is cancelled!", 1000, 0, false);
+} else {
+// Play finish sounds
 setVolume(64);
-
-// Restore FPS
-setGameFPSLimit(105);
-
-
-// TODO: exit game at finish (menu option)
-
+int noise_count=sizeof(noises)/sizeof(noises[0]);
+int noise_id=0;
+CVector soundPos;
+soundPos.x=sx;
+soundPos.y=sy;
+soundPos.z=sz;
+int notify_count=100;
+while(notify_count--){
+if(GetAsyncKeyState(VK_F7)&1){break;}
+MessageJumpQ("Press F7 to stop notify", 1000, 0, false);
+playSoundId(noises[noise_id].id,&soundPos);
+Sleep(100);
+noise_id++;
+noise_id%=noise_count;
+}
 
 }
 
+// TODO: exit game at finish (menu option)
+
+}
 
 
 
@@ -406,15 +466,23 @@ createPano();
 }
 
 if(GetAsyncKeyState(VK_F8)&1){
-places_current++;
-places_current%=places_count;
 //float haveZ=findGroundZForCoord(places[places_current].x,places[places_current].y);
 //requestCollision(&newpos,0xB72914);
+
+void *cped=getPlayerCped();
+int interior=places[places_current].interior;
+
+*(int*)0xB72914=interior; // currentArea
+*(char*)(cped+0x2F)=interior; //linked width
+CStreaming__RemoveBuildingsNotInArea(interior);
 flyTo(places[places_current].x,places[places_current].y,places[places_current].z,places[places_current].heading);
+
+places_current++;
+places_current%=places_count;
 }
 
 if(GetAsyncKeyState(VK_F9)&1){
-flyTo(drand()*5000.0-2500.0,drand()*5000.0-2500.0,300.0,drand()*360.0);
+flyTo(drand()*5000.0-2500.0,drand()*5000.0-2500.0,1000.0,drand()*360.0);
 }
 
 if(GetAsyncKeyState(VK_F10)&1){
@@ -432,8 +500,9 @@ if(GetAsyncKeyState(VK_F11)&1){
 *sunCoreRed=drand()*255.0;*/
 
 //MessageJumpQ(tmp, 1000, 0, false);
-
-
+*CTheScripts__bDisplayHud^=1;
+*CHud__bScriptDontDisplayRadar^=1;
+continue;
 char *sunBlockedByClouds=(char *)0xC3E030;
 int *sunChangeBrightnessImmediately=(int*)0xC3E034;
 unsigned int *sunNumCoronas=(unsigned int*)0xC3E038;

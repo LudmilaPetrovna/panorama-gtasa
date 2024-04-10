@@ -48,6 +48,10 @@ int *brightness=(int *)(0x00BA6784); // by CE
 int *darkness=(int*)(0x8d5204);
 char *darknessEnable=(char*)(0xc402c4);
 
+char *CTheScripts__bDisplayHud=(char*)0xA444A0;
+char *CHud__bScriptDontDisplayRadar=(char*)0xBAA3FB;;
+
+
 float *timeScale=(float*)0xB7CB64;
 float *timeStep=(float*)0xB7CB5C;
 char *codePause=(char*)0xB7CB48;
@@ -114,6 +118,11 @@ void setGameFPSLimit(int fps){
 *(int*)0xC1704C=fps;
 }
 
+void *getPlayerCped(){
+void *player_info=(void*)(0xB7CD98); // (CPlayerInfo *)0xB7CD98
+void *cped=*(void**)(player_info+0); // CPlayerPed -> CPed -> CPhysical -> CEntity -> CPlaceable
+return cped;
+}
 
 void cpedSetHeading(void *cped, float angle){ // -M_PI..+M_PI
 CPlaceable__SetHeading(cped,angle);
@@ -144,8 +153,7 @@ MessageJumpQ(screenMessage, 10000, 0, false);
 }
 
 void flyTo(float tx, float ty, float tz, float heading){
-void *player_info=(void*)(0xB7CD98); // (CPlayerInfo *)0xB7CD98
-void *cped=*(void**)(player_info+0); // CPlayerPed -> CPed -> CPhysical -> CEntity -> CPlaceable
+void *cped=getPlayerCped();
 void *cped_matrix=*(void**)(cped+0x14); // matrix???
 CVector *player_pos=(CVector *)(cped_matrix+0x30);
 
@@ -170,7 +178,9 @@ waitNFrames(1);
 }
 
 // slow landing
+if(tz>100 || tz<-100){
 tz=findGroundZForCoord(tx,ty)+2.0;
+}
 for(q=10;q>=0;q--){
 player_pos->x=tx;
 player_pos->y=ty;
