@@ -9,6 +9,7 @@
 # Примеры
 
 [![pano_4k.png](./Samples/.thumb/pano_4k.png.jpg)](./Samples/pano_4k.png)
+[![pano--608x133x30.png](./Samples/.thumb/pano--608x133x30.png.jpg)](./Samples/pano--608x133x30.png)
 [![pano-10-128x96.png](./Samples/.thumb/pano-10-128x96.png.jpg)](./Samples/pano-10-128x96.png)
 [![pano-20-128x96.png](./Samples/.thumb/pano-20-128x96.png.jpg)](./Samples/pano-20-128x96.png)
 [![pano2.png](./Samples/.thumb/pano2.png.jpg)](./Samples/pano2.png)
