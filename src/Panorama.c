@@ -126,8 +126,7 @@ int totalFrames=cols*rows;
 
 char framename[32];
 
-void *player_data=(void*)(0xB7CD98);
-void *cped=*(void**)(player_data+0);
+void *cped=getPlayerCped();
 void *cped_xyz=*(void**)(cped+0x14); // matrix???
 float player_x=*(float*)(cped_xyz+0x30);
 float player_y=*(float*)(cped_xyz+0x34);
@@ -372,6 +371,63 @@ noise_id%=noise_count;
 // TODO: exit game at finish (menu option)
 
 }
+
+
+void placesShow(){
+double sx,sy,sz;
+double tx,ty,tz;
+double jump;
+int duration;
+int weatherID;
+int q;
+double fov,speed,tth;
+void *cped=getPlayerCped();
+void *cped_xyz=*(void**)(cped+0x14); // matrix???
+
+void *camState=malloc(sizeof(CCamera));
+memcpy(camState,theCamera,sizeof(CCamera));
+
+while(1){
+
+weatherID=drand()*23.0;
+forceWeatherNow(weatherID);
+rollTime();
+memcpy(theCamera,camState,sizeof(CCamera));
+// to new place and time
+sx=drand()*5600.0-2800.0;
+sy=drand()*5600.0-2800.0;
+flyTo(sx,sy,1000.0,drand()*360.0);
+fov=50.0+drand()*40.0;
+jump=drand()*3.0;
+sz=(*(float*)(cped_xyz+0x38))+jump;
+duration=(drand()*15.0*30.0+5.0*30.0)*2.0; // from 5 to 20 seconds
+speed=drand()*20.0;
+if(rand()&1){
+speed*=-1;
+}
+
+
+// rotate cam and ticks clock
+for(q=0;q<duration;q++){
+if(GetAsyncKeyState(VK_F7)&1){goto finished;}
+*clockSeconds++;
+
+tth=speed*q/1000.0/2.0;
+tx=sx+sin(tth)*10.0;
+ty=sy+cos(tth)*10.0;
+tz=sz+cos(tth+123.45)*2.0;
+
+setCameraFromToFov(sx,sy,sz,tx,ty,tz,fov);
+Sleep(33);
+}
+}
+
+finished:
+MessageJumpQ("Show time is finished", 1000, 0, false);
+memcpy(theCamera,camState,sizeof(CCamera));
+free(camState);
+}
+
 
 
 
@@ -731,6 +787,12 @@ mez=findGroundZForCoord(mex,mey);
 
 
 
+}
+
+
+if(GetAsyncKeyState(VK_F12)&1){
+placesShow();
+MessageJumpQ("Show must go on!", 1000, 0, false);
 }
 
 

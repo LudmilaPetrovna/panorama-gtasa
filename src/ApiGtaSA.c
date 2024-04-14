@@ -199,7 +199,7 @@ waitNFrames(1);
 
 *GAME_GRAVITY=0.0080000004;
 sprintf(screenMessage,"You landed at: %.3fx%.3fx%.3f",player_pos->x,player_pos->y,player_pos->z);
-MessageJumpQ(screenMessage, 10000, 0, false);
+MessageJumpQ(screenMessage, 100, 0, false);
 
 }
 
