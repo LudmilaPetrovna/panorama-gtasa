@@ -7,12 +7,19 @@
 #include <math.h>
 
 #include "ApiGtaSA.h"
+#include "Freeze.h"
 
 // TODO: add more fun points of game, game is so beautiful!
 typedef struct{
 float x,y,z,heading;
 int interior;
 }PLACES;
+
+
+PLACES tower={
+1573.125, -1242.125, 277,36
+};
+
 
 PLACES places[]={
 {1932.6908, -1341.0327, 17.923, 90},
@@ -115,8 +122,61 @@ Sleep(100);
 }
 }
 
+
+
+void precachePanoPlace(double sx, double sy, double sz){
+double tx=0,ty=0,tz=0;
+double xrotth;
+double yrotth;
+double sphereRadius=10.0;
+double radius1;
+int q;
+
+*darkness=100;
+*darknessEnable=1;
+setGameFPSLimit(105);
+
+for(q=0;q<300;q+=1){
+if(GetAsyncKeyState(VK_F7)&1){return;}
+
+xrotth=(360.0*10.0*q/200.0)/180.0*M_PI;
+yrotth=(89.0-178.0*q/200.0)/180.0*M_PI;
+
+radius1=cos(yrotth)*sphereRadius;
+tz=sz+sin(yrotth)*sphereRadius;
+tx=sx+sin(xrotth)*radius1;
+ty=sy+cos(xrotth)*radius1;
+
+refreshFreeze();
+setCameraFromToFov(sx,sy,sz,tx,ty,tz,3.0);
+Sleep(33);
+}
+
+*darkness=200;
+*darknessEnable=1;
+for(q=0;q<300;q+=1){
+if(GetAsyncKeyState(VK_F7)&1){return;}
+
+xrotth=(360.0*10.0*q/300.0)/180.0*M_PI;
+yrotth=(89.0-178.0*q/300.0)/180.0*M_PI;
+
+radius1=cos(yrotth)*sphereRadius;
+tz=sz+sin(yrotth)*sphereRadius;
+tx=sx+sin(xrotth)*radius1;
+ty=sy+cos(xrotth)*radius1;
+
+refreshFreeze();
+setCameraFromToFov(sx,sy,sz,tx,ty,tz,90.0);
+Sleep(33);
+}
+
+
+}
+
+
 void createPano(){
 
+setVolumeSfx(0);
 double jumpTo=0.0;
 double fov=60.0;
 int cols=360.0/fov*3.0+1.0;
@@ -134,6 +194,10 @@ float player_z=*(float*)(cped_xyz+0x38);
 
 double sx=player_x,sy=player_y,sz=player_z+jumpTo;
 double tx=0,ty=0,tz=0;
+double xrotth;
+double yrotth;
+double sphereRadius=10.0;
+double radius1;
 
 
 removeTrash();
@@ -145,28 +209,7 @@ FILE *pto=NULL;
 //MessageJumpQ(tmp, 2000, 0, false);
 
 
-// When we start creating panorama?
-int panoClockHours=*clockHours;
-int panoClockMinutes=*clockMinutes;
-int panoClockSeconds=0;
 
-// Save current camera state to restore it again after screenshot session
-void *camState=malloc(sizeof(CCamera));
-memcpy(camState,theCamera,sizeof(CCamera));
-
-// Save weather state
-float panoWeatherInterpolator=*weatherInterpolationValue;
-short panoWeatherForced=*weatherForcedType;
-short panoWeatherNewType=*weatherNewType;
-short panoWeatherOldType=*weatherOldType;
-
-// Disable audio
-setVolume(0);
-
-double xrotth;
-double yrotth;
-double sphereRadius=10.0;
-double radius1;
 int q;
 int is_cancelled=0;
 
@@ -179,51 +222,7 @@ cpedSetVisivility(cped, 0);
 
 
 // First pass, precache
-*darkness=100;
-*darknessEnable=1;
-setGameFPSLimit(105);
-MessageJumpQ("Creating Panorama, please wait!", 1000, 0, false);
-
-for(q=0;q<300;q+=1){
-if(GetAsyncKeyState(VK_F7)&1){is_cancelled=1;goto pano_finish;}
-
-xrotth=(360.0*10.0*q/200.0)/180.0*M_PI;
-yrotth=(89.0-178.0*q/200.0)/180.0*M_PI;
-
-radius1=cos(yrotth)*sphereRadius;
-tz=sz+sin(yrotth)*sphereRadius;
-tx=sx+sin(xrotth)*radius1;
-ty=sy+cos(xrotth)*radius1;
-
-*clockHours=panoClockHours;
-*clockMinutes=panoClockMinutes;
-*clockSeconds=panoClockSeconds;
-
-setCameraFromToFov(sx,sy,sz,tx,ty,tz,3.0);
-Sleep(33);
-}
-
-*darkness=200;
-*darknessEnable=1;
-for(q=0;q<300;q+=1){
-if(GetAsyncKeyState(VK_F7)&1){is_cancelled=1;goto pano_finish;}
-
-xrotth=(360.0*10.0*q/300.0)/180.0*M_PI;
-yrotth=(89.0-178.0*q/300.0)/180.0*M_PI;
-
-radius1=cos(yrotth)*sphereRadius;
-tz=sz+sin(yrotth)*sphereRadius;
-tx=sx+sin(xrotth)*radius1;
-ty=sy+cos(xrotth)*radius1;
-
-*clockHours=panoClockHours;
-*clockMinutes=panoClockMinutes;
-*clockSeconds=panoClockSeconds;
-
-setCameraFromToFov(sx,sy,sz,tx,ty,tz,90.0);
-Sleep(33);
-}
-
+precachePanoPlace(sx,sy,sz);
 
 // Second pass
 *darkness=0;
@@ -258,20 +257,8 @@ tz=sz+sin(yrotth)*sphereRadius;
 tx=sx+sin(xrotth)*radius1;
 ty=sy+cos(xrotth)*radius1;
 
-// Resync clock to initial panorama state
-*clockHours=panoClockHours;
-*clockMinutes=panoClockMinutes;
-*clockSeconds=panoClockSeconds;
+refreshFreeze();
 
-// restore/refresh weather state, like was in start
-*weatherInterpolationValue=0;
-*weatherForcedType=panoWeatherForced;
-*weatherNewType=panoWeatherNewType;
-*weatherOldType=panoWeatherOldType;
-
-// Pause game time, we don't want any movements during screenshot session.
-*timeScale=0.0;
-*timeStep=0.0;
 
 // Remove pause (if any), let's game tick again
 *codePause=0;
@@ -317,39 +304,14 @@ if(pto){
 fclose(pto);
 }
 
-// Restore camera
-memcpy(theCamera,camState,sizeof(CCamera));
-free(camState);
-
-// Restore FPS
-setGameFPSLimit(105);
-
-// Restore Player visibility
-cpedSetVisivility(cped, 1);
-
-// Restore audio, if any
-setVolume(64);
-
-// Restore time speed
-*timeScale=1.0;
-*timeStep=1.0;
-*codePause=0;
-*userPause=0;
-
-// Remove darkness, if any
-*darkness=0;
-*darknessEnable=0;
-
-// Restore HUD
-*CTheScripts__bDisplayHud=1;
-*CHud__bScriptDontDisplayRadar=0;
+restoreFreeze();
 
 // Notify user
 if(is_cancelled){
 MessageJumpQ("Panorama is cancelled!", 1000, 0, false);
 } else {
 // Play finish sounds
-setVolume(64);
+setVolumeSfx(64);
 int noise_count=sizeof(noises)/sizeof(noises[0]);
 int noise_id=0;
 CVector soundPos;
@@ -368,6 +330,9 @@ noise_id%=noise_count;
 
 }
 
+// second restore to restore sound volume
+restoreFreeze();
+
 // TODO: exit game at finish (menu option)
 
 }
@@ -384,16 +349,21 @@ double fov,speed,tth;
 void *cped=getPlayerCped();
 void *cped_xyz=*(void**)(cped+0x14); // matrix???
 
-void *camState=malloc(sizeof(CCamera));
-memcpy(camState,theCamera,sizeof(CCamera));
+prepareFreeze();
+
+// set volume to low
+setVolumeSfx(5);
 
 while(1){
+// to new place and time
+restoreFreeze();
 
 weatherID=drand()*23.0;
 forceWeatherNow(weatherID);
 rollTime();
-memcpy(theCamera,camState,sizeof(CCamera));
-// to new place and time
+
+prepareFreeze();
+
 sx=drand()*5600.0-2800.0;
 sy=drand()*5600.0-2800.0;
 flyTo(sx,sy,1000.0,drand()*360.0);
@@ -424,8 +394,7 @@ Sleep(33);
 
 finished:
 MessageJumpQ("Show time is finished", 1000, 0, false);
-memcpy(theCamera,camState,sizeof(CCamera));
-free(camState);
+restoreFreeze();
 }
 
 
@@ -490,12 +459,12 @@ int *_renderStartTimeHigh=(int*)0xB7CB3C;
 *_renderStartTimeLow=0;
 *_renderStartTimeHigh=0;
 
-setVolume(0);
+setVolumeSfx(0);
 
 } else {
 *timeScale=1.0;
 *timeStep=1.0;
-setVolume(64);
+setVolumeSfx(64);
 
 }
 

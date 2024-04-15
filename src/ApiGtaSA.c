@@ -141,7 +141,11 @@ if(state){
 
 }
 
-void setVolume(int vol){ // vol 0..64
+char getVolumeSfx(){
+return *(char*)0xB5FCCC;
+}
+
+void setVolumeSfx(int vol){ // vol 0..64
 setEffectsMasterVolume((void*)0xB6BC90,vol);
 }
 

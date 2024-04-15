@@ -24,7 +24,8 @@ typedef struct _FxManager_c FxManager_c;
 
 
 // my useful funcs
-void setVolume(int vol);
+char getVolumeSfx();
+void setVolumeSfx(int vol);
 void playSoundId(int id, CVector *pos);
 void rollTime();
 void flyTo(float tx, float ty, float tz, float heading);
