@@ -92,6 +92,8 @@ void refreshFreeze(){
 // Pause game time, we don't want any movements during screenshot session
 *timeScale=0.0;
 *timeStep=0.0;
+
+setGravity(0);
 }
 
 
@@ -99,7 +101,7 @@ void restoreFreeze(){
 
 // Restore camera
 if(frozen.camState){
-memcpy(theCamera,frozen.camState,sizeof(CCamera));
+setCameraFromState(frozen.camState);
 }
 
 // Restore FPS
@@ -124,6 +126,9 @@ setVolumeSfx(frozen.volumeSfx);
 // Restore HUD
 *CTheScripts__bDisplayHud=frozen.displayHud;
 *CHud__bScriptDontDisplayRadar=frozen.hideRadar;
+
+restoreGravity();
+
 }
 
 

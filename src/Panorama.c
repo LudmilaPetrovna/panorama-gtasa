@@ -185,14 +185,10 @@ int rows=180.0/fov*3.0+1.0;
 int totalFrames=cols*rows;
 
 char framename[32];
-
 void *cped=getPlayerCped();
-void *cped_xyz=*(void**)(cped+0x14); // matrix???
-float player_x=*(float*)(cped_xyz+0x30);
-float player_y=*(float*)(cped_xyz+0x34);
-float player_z=*(float*)(cped_xyz+0x38);
+CVector *player_pos=getPlayerVector();
 
-double sx=player_x,sy=player_y,sz=player_z+jumpTo;
+double sx=player_pos->x,sy=player_pos->y,sz=player_pos->z+jumpTo;
 double tx=0,ty=0,tz=0;
 double xrotth;
 double yrotth;
@@ -205,14 +201,10 @@ removeTrash();
 FILE *pto=NULL;
 
 
-//sprintf(tmp,"me at: %.3fx%.3fx%.3f",player_x,player_y,player_z);
-//MessageJumpQ(tmp, 2000, 0, false);
-
-
-
 int q;
 int is_cancelled=0;
 
+prepareFreeze();
 setAspectRatio((double)(*LastScreenWidth)/(*LastScreenHeight));
 setWindynessForCurrentWeather(0);
 setDrawingDistance(8000.0);
@@ -229,13 +221,13 @@ precachePanoPlace(sx,sy,sz);
 *darknessEnable=0;
 setGameFPSLimit(10);
 
-sprintf(panoName,"pano-%d-%dx%dx%d",(int)time(0),(int)player_x,(int)player_y,(int)player_z);
+sprintf(panoName,"pano-%d-%dx%dx%d",(int)time(0),(int)player_pos->x,(int)player_pos->y,(int)player_pos->z);
 sprintf(path,"%s\\%s",panoRoot,panoName);
 CreateDirectory(path,NULL);
 
 sprintf(path,"%s\\%s\\pano-build.bat",panoRoot,panoName);
 pto=fopen(path,"wt");
-fprintf(pto,"\"V:\\h\\Hugin-2023.0.0-win64\\nona\" -o pano-%dx%dx%d pano.pto",(int)player_x,(int)player_y,(int)player_z);
+fprintf(pto,"\"V:\\h\\Hugin-2023.0.0-win64\\nona\" -o pano-%dx%dx%d pano.pto",(int)player_pos->x,(int)player_pos->y,(int)player_pos->z);
 fclose(pto);
 
 sprintf(path,"%s\\%s\\pano.pto",panoRoot,panoName);
@@ -275,6 +267,7 @@ setCameraFromToFov(sx,sy,sz,tx,ty,tz,fov);
 
 // Wait for new redraw cycle
 waitNFrames(2);
+Sleep(10);
 
 // Stop time even more, setting game to pause while creating screenshot
 *codePause=1;
@@ -314,15 +307,11 @@ MessageJumpQ("Panorama is cancelled!", 1000, 0, false);
 setVolumeSfx(64);
 int noise_count=sizeof(noises)/sizeof(noises[0]);
 int noise_id=0;
-CVector soundPos;
-soundPos.x=sx;
-soundPos.y=sy;
-soundPos.z=sz;
 int notify_count=100;
 while(notify_count--){
 if(GetAsyncKeyState(VK_F7)&1){break;}
 MessageJumpQ("Press F7 to stop notify", 1000, 0, false);
-playSoundId(noises[noise_id].id,&soundPos);
+playSoundId(noises[noise_id].id,player_pos);
 Sleep(100);
 noise_id++;
 noise_id%=noise_count;
@@ -330,7 +319,7 @@ noise_id%=noise_count;
 
 }
 
-// second restore to restore sound volume
+// second restore to restore sound volume again
 restoreFreeze();
 
 // TODO: exit game at finish (menu option)
@@ -375,6 +364,8 @@ speed=drand()*20.0;
 if(rand()&1){
 speed*=-1;
 }
+
+flyTo(sx,sy,1000.0,drand()*360.0);
 
 
 // rotate cam and ticks clock
@@ -424,7 +415,6 @@ if(is_pause){
 *timeScale=0.0;
 *timeStep=0.0;
 
-float *CTimer_game_FPS=(float*)0xB7CB50;
 float *CTimer_ms_fTimeStepNonClipped=(float*)0xB7CB58;
 float *CTimer_ms_fTimeStep=(float*)0xB7CB5C;
 float *CTimer_ms_fTimeScale=(float*)0xB7CB64;
@@ -533,6 +523,33 @@ if(GetAsyncKeyState(VK_F11)&1){
 *CHud__bScriptDontDisplayRadar^=1;
 
 
+
+// Беру какую-то рандомную координату на карте
+CVector newpos;
+newpos.x=drand()*5600.0-2800.0;
+newpos.y=drand()*5600.0-2800.0;
+newpos.z=-200;
+
+// Вроде бы как тут должна прогрузиться коллизия, но это не точно.
+// Вроде как оно и не работает
+requestCollision(&newpos,0);
+CWorld__TestSphereAgainstWorld(newpos,1.0,0,1,1,1,1,1,0);
+CStreaming__StreamZoneModels(&newpos);
+CVector *player_pos=getPlayerVector();
+memcpy(player_pos,&newpos,sizeof(CVector));
+
+Sleep(300);
+
+// Получаем высоту точки. На далеких позициях всегда выдает 20.0
+// т.е. по каким-то причинам карта еще не загрузилась.
+newpos.z=CWorld__FindGroundZForCoord(newpos.x,newpos.y);
+player_pos->z=newpos.z;
+
+// Вывод на экран
+sprintf(tmp,"try pos: %.3fx%.3fx%.3f",newpos.x,newpos.y,newpos.z);
+MessageJumpQ(tmp, 1000, 0, false);
+
+continue;
 void *cped=getPlayerCped();
 *(char *)(cped+0x474)^=2;
 
@@ -748,10 +765,6 @@ int *weatherType_int=(int*)0x72A590;
 *_CWeather_LightningDuration=0;
 
 
-mex=drand()*2000.0-1000.0;
-mey=drand()*2000.0-1000.0;
-mez=findGroundZForCoord(mex,mey);
-//requestCollision(&newpos,0xB72914);
 
 
 

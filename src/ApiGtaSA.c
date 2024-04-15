@@ -40,7 +40,8 @@ float *weatherWindynessForWeatherID=(float*)0x8D5E50;
 float *CRenderer_ms_lodDistScale=(float*)0x8CD800;
 float *CRenderer_ms_fCameraHeading=(float*)0xB7684C; // (-pi ... +pi)
 
-int *CTimer_m_FrameCounter=(int*)0xB7CB4C;
+volatile int *CTimer_m_FrameCounter=(int*)0xB7CB4C;
+volatile float *CTimer_game_FPS=(float*)0xB7CB50;
 
 float *cameraFov=(float *)(0xB6F028+0xCB8); // by Vital (vitalrus) at plugin-sdk-ru (https://discord.gg/QEesDGb)
 char *cameraFovLock=(char *)(0xb6fd15);
@@ -57,9 +58,9 @@ float *timeStep=(float*)0xB7CB5C;
 char *codePause=(char*)0xB7CB48;
 char *userPause=(char*)0xB7CB49;
 
-unsigned short *clockSeconds=(unsigned short *)0xB70150;
-unsigned char *clockMinutes=(unsigned char *)0xB70152;
-unsigned char *clockHours=(unsigned char *)0xB70153;
+volatile unsigned short *clockSeconds=(unsigned short *)0xB70150;
+volatile unsigned char *clockMinutes=(unsigned char *)0xB70152;
+volatile unsigned char *clockHours=(unsigned char *)0xB70153;
 CCamera *theCamera=(CCamera*)0xB6F028;
 float *GAME_GRAVITY=(float*)0x863984;
 
@@ -69,6 +70,14 @@ int *LastScreenHeight=(int*)0xc9bee8;
 
 int *screenHudMenuWidth=(int*)0xc17044;
 int *screenHudMenuHeight=(int*)0xc17048;
+
+void setGravity(float n){
+*GAME_GRAVITY=n;
+}
+void restoreGravity(){
+*GAME_GRAVITY=0.0080000004;
+}
+
 
 void waitNFrames(int n){
 int to=n+(*CTimer_m_FrameCounter);
@@ -116,6 +125,13 @@ void setGameFPSLimit(int fps){
 // use 105 for smooth game
 *(int*)0x619626=fps; // from SA Limits Ajuster
 *(int*)0xC1704C=fps;
+}
+
+CVector *getPlayerVector(){
+void *cped=getPlayerCped();
+void *cped_matrix=*(void**)(cped+0x14); // matrix???
+CVector *player_pos=(CVector *)(cped_matrix+0x30);
+return(player_pos);
 }
 
 void *getPlayerCped(){
@@ -166,12 +182,10 @@ MessageJumpQ(screenMessage, 10000, 0, false);
 }
 
 void flyTo(float tx, float ty, float tz, float heading){
+
+setGravity(0);
 void *cped=getPlayerCped();
-void *cped_matrix=*(void**)(cped+0x14); // matrix???
-CVector *player_pos=(CVector *)(cped_matrix+0x30);
-
-*GAME_GRAVITY=0;
-
+CVector *player_pos=getPlayerVector();
 float th=heading/180.0*M_PI;
 float fx=player_pos->x,fy=player_pos->y,fz=player_pos->z,fh=CPlaceable__GetHeading(cped);
 
@@ -201,7 +215,7 @@ player_pos->z=tz+(float)q/3.0;
 waitNFrames(1);
 }
 
-*GAME_GRAVITY=0.0080000004;
+restoreGravity();
 sprintf(screenMessage,"You landed at: %.3fx%.3fx%.3f",player_pos->x,player_pos->y,player_pos->z);
 MessageJumpQ(screenMessage, 100, 0, false);
 
@@ -225,4 +239,22 @@ theCamera->m_vecFixedModeSource.z=sz;
 theCamera->m_fFOVNew=fov;
 }
 
+
+void setCameraFromState(CCamera *state){
+theCamera->m_nTypeOfSwitch=state->m_nTypeOfSwitch;
+theCamera->m_bStartInterScript=state->m_bStartInterScript;
+theCamera->m_bLookingAtVector=state->m_bLookingAtVector;
+theCamera->m_nModeToGoTo=state->m_nModeToGoTo;
+theCamera->m_bLookingAtPlayer=state->m_bLookingAtPlayer;
+theCamera->m_nWhoIsInControlOfTheCamera=state->m_nWhoIsInControlOfTheCamera;
+theCamera->m_bGarageFixedCamPositionSet=state->m_bGarageFixedCamPositionSet;
+theCamera->m_bBlockZoom=state->m_bBlockZoom;
+theCamera->m_vecFixedModeVector.x=state->m_vecFixedModeVector.x;
+theCamera->m_vecFixedModeVector.y=state->m_vecFixedModeVector.y;
+theCamera->m_vecFixedModeVector.z=state->m_vecFixedModeVector.z;
+theCamera->m_vecFixedModeSource.x=state->m_vecFixedModeSource.x;
+theCamera->m_vecFixedModeSource.y=state->m_vecFixedModeSource.y;
+theCamera->m_vecFixedModeSource.z=state->m_vecFixedModeSource.z;
+theCamera->m_fFOVNew=state->m_fFOVNew;
+}
 

@@ -30,6 +30,8 @@ void playSoundId(int id, CVector *pos);
 void rollTime();
 void flyTo(float tx, float ty, float tz, float heading);
 void setCameraFromToFov(float sx, float sy, float sz, float tx, float ty, float tz, float fov);
+void setCameraFromState(CCamera *state);
+CVector *getPlayerVector();
 void *getPlayerCped();
 void cpedSetHeading(void *cped, float angle);
 void cpedSetVisivility(void *cped, int state);
@@ -38,6 +40,8 @@ void setGameFPSLimit(int fps);
 void setWindynessForCurrentWeather(float val);
 void setDrawingDistance(float dist);
 void waitNFrames(int n);
+void setGravity(float n);
+void restoreGravity();
 
 
 
@@ -58,6 +62,10 @@ extern double __cdecl FindPlayerHeading(int playerId);
 extern __cdecl void requestCollision(const CVector *vec, int where);
 extern __cdecl float findGroundZForCoord(float x, float y);
 
+extern double __cdecl CWorld__FindGroundZForCoord(float x, float y);
+extern int __cdecl CWorld__TestSphereAgainstWorld(CVector sphereCenter, float sphereRadius, CEntity *ignoreEntity, char buildings, char vehicles, char peds, char objects, char dummies, char doIgnoreCameraCheck);
+extern void __cdecl CStreaming__StreamZoneModels(const CVector *posn);
+
 extern unsigned char* sunCoreBlue;
 extern unsigned char* sunCoreGreen;
 extern unsigned char* sunCoreRed;
@@ -66,6 +74,8 @@ extern float *CRenderer_ms_lodDistScale;
 extern float *CRenderer_ms_fCameraHeading;
 
 
+volatile extern int *CTimer_m_FrameCounter;
+volatile extern float *CTimer_game_FPS;
 
 extern char *CTheScripts__bDisplayHud;
 extern char *CHud__bScriptDontDisplayRadar;
@@ -96,9 +106,9 @@ extern float *timeStep;
 extern char *codePause;
 extern char *userPause;
 
-extern unsigned short *clockSeconds;
-extern unsigned char *clockMinutes;
-extern unsigned char *clockHours;
+volatile extern unsigned short *clockSeconds;
+volatile extern unsigned char *clockMinutes;
+volatile extern unsigned char *clockHours;
 extern CCamera *theCamera;
 extern float *GAME_GRAVITY;
 
