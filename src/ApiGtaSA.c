@@ -190,7 +190,7 @@ float th=heading/180.0*M_PI;
 float fx=player_pos->x,fy=player_pos->y,fz=player_pos->z,fh=CPlaceable__GetHeading(cped);
 
 float dist=sqrt(pow(fx-tx,2)+pow(fy-ty,2)+pow(fz-tz,2));
-int steps=dist/30.0+1;
+int steps=dist/10.0+1;
 int q;
 float p;
 for(q=0;q<steps;q++){

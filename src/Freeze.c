@@ -93,6 +93,11 @@ void refreshFreeze(){
 *timeScale=0.0;
 *timeStep=0.0;
 
+// change cped
+void *cped=getPlayerCped();
+*(float*)(cped+0x540)=99999.99; // health
+
+
 setGravity(0);
 }
 

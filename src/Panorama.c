@@ -8,6 +8,7 @@
 
 #include "ApiGtaSA.h"
 #include "Freeze.h"
+#include "hilbert.h"
 
 // TODO: add more fun points of game, game is so beautiful!
 typedef struct{
@@ -219,7 +220,7 @@ precachePanoPlace(sx,sy,sz);
 // Second pass
 *darkness=0;
 *darknessEnable=0;
-setGameFPSLimit(10);
+setGameFPSLimit(3);
 
 sprintf(panoName,"pano-%d-%dx%dx%d",(int)time(0),(int)player_pos->x,(int)player_pos->y,(int)player_pos->z);
 sprintf(path,"%s\\%s",panoRoot,panoName);
@@ -267,7 +268,7 @@ setCameraFromToFov(sx,sy,sz,tx,ty,tz,fov);
 
 // Wait for new redraw cycle
 waitNFrames(2);
-Sleep(10);
+Sleep(50);
 
 // Stop time even more, setting game to pause while creating screenshot
 *codePause=1;
@@ -389,9 +390,77 @@ restoreFreeze();
 }
 
 
+void cityScanner(){
+int q,w,a,s,e,t;
+int step=200;
+int npx,npy;
+int mpx,mpy;
+CVector *player_pos=getPlayerVector();
+float *maptile=malloc(step*step*sizeof(float));
+FILE *out;
+float lastHeight=300.0;
+float curHeight=0;
+int level=5; // 32x32
+int tiles=hilbert_points_at_level(level);
+void *cped=getPlayerCped();
+
+setGravity(0);
+
+for(t=0;t<tiles;t++){
+hilbert(t,level,&q,&w);
 
 
+char filename[256];
+char status[256];
+sprintf(filename,"v:\\heightmap-%d-%d.bin",q,w);
+sprintf(status,"%dx%d (%d/%d)",q,w,t,tiles);
+out=fopen(filename,"rb");
+if(out){
+fclose(out);
+continue;
+}
 
+flyTo(q*step-3000+step/2,w*step-3000+step/2,111,drand()*360.0);
+*(float*)(cped+0x540)=99999.99; // health
+MessageJumpQ(status, 2000, 0, false);
+setVolumeSfx(64);
+Sleep(5000);
+if(GetAsyncKeyState(VK_F9)&1){goto finish;}
+
+// get data
+
+for(s=0;s<step;s++){
+for(a=0;a<step;a++){
+npx=q*step+a-3000;
+npy=w*step+s-3000;
+mpx=a;
+mpy=s;
+if(npx>=3000 || npy>=3000){continue;}
+if(mpx>=step || mpy>=step){continue;}
+//curHeight=CWorld__FindGroundZForCoord(npx,npy);
+curHeight=findGroundZForCoord(npx,npy);
+maptile[mpx+mpy*step]=curHeight;
+}
+}
+
+curHeight+=10.0;
+if(curHeight>lastHeight){lastHeight=curHeight;}
+if(curHeight<lastHeight){lastHeight-=5;}
+if(curHeight>lastHeight){lastHeight=curHeight;}
+
+out=fopen(filename,"wb");
+fwrite(maptile,1,step*step*sizeof(float),out);
+fclose(out);
+
+
+}
+
+finish:
+
+MessageJumpQ("Map is done!", 1000, 0, false);
+restoreGravity();
+
+}
 
 
 
@@ -476,6 +545,11 @@ playSoundId(1083,&pos);
 
 }
 
+if(GetAsyncKeyState(VK_NUMPAD1)&1){
+cityScanner();
+}
+
+
 if(GetAsyncKeyState(VK_F6)&1){
 rollTime();
 }
@@ -519,39 +593,42 @@ if(GetAsyncKeyState(VK_F11)&1){
 *sunCoreRed=drand()*255.0;*/
 
 //MessageJumpQ(tmp, 1000, 0, false);
-*CTheScripts__bDisplayHud^=1;
-*CHud__bScriptDontDisplayRadar^=1;
 
+CVector *player_pos=getPlayerVector();
 
-
-// Беру какую-то рандомную координату на карте
 CVector newpos;
-newpos.x=drand()*5600.0-2800.0;
-newpos.y=drand()*5600.0-2800.0;
+newpos.x=player_pos->x+drand()*200.0-100.0;
+newpos.y=player_pos->y+drand()*200.0-100.0;
 newpos.z=-200;
+newpos.z=CWorld__FindGroundZForCoord(newpos.x,newpos.y);
 
 // Вроде бы как тут должна прогрузиться коллизия, но это не точно.
 // Вроде как оно и не работает
-requestCollision(&newpos,0);
-CWorld__TestSphereAgainstWorld(newpos,1.0,0,1,1,1,1,1,0);
-CStreaming__StreamZoneModels(&newpos);
-CVector *player_pos=getPlayerVector();
-memcpy(player_pos,&newpos,sizeof(CVector));
-
-Sleep(300);
+//requestCollision(&newpos,0);
+//CWorld__TestSphereAgainstWorld(newpos,1.0,0,1,1,1,1,1,0);
+//CStreaming__StreamZoneModels(&newpos);
+//memcpy(player_pos,&newpos,sizeof(CVector));
+/*
+int tryout=20;
+while(tryout--){
+Sleep(100);
 
 // Получаем высоту точки. На далеких позициях всегда выдает 20.0
 // т.е. по каким-то причинам карта еще не загрузилась.
 newpos.z=CWorld__FindGroundZForCoord(newpos.x,newpos.y);
+if(newpos.z!=20.0){break;}
+}
 player_pos->z=newpos.z;
-
+*/
 // Вывод на экран
 sprintf(tmp,"try pos: %.3fx%.3fx%.3f",newpos.x,newpos.y,newpos.z);
 MessageJumpQ(tmp, 1000, 0, false);
 
-continue;
+
 void *cped=getPlayerCped();
-*(char *)(cped+0x474)^=2;
+*(float*)(cped+0x540)=99999.99; // health
+
+continue;
 
 
 char *sunBlockedByClouds=(char *)0xC3E030;
