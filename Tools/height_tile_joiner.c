@@ -62,4 +62,6 @@ fclose(f);
 
 system("ffmpeg -f rawvideo -s 6000x6000 -pix_fmt gray -i heightmap.pic -s 300x300 -pix_fmt rgb24 -y heightmap.png");
 system("ffmpeg -f rawvideo -s 6000x6000 -pix_fmt grayf32le -i heightmap.bin -s 300x300 -pix_fmt rgb24 -y heightmap-0.png");
+system("ffmpeg -f rawvideo -s 6000x6000 -pix_fmt gray -i heightmap.pic -pix_fmt rgb24 -y heightmap-full.png");
+system("ffmpeg -f rawvideo -s 6000x6000 -pix_fmt grayf32le -i heightmap.bin -pix_fmt rgb24 -y heightmap-0-full.png");
 }

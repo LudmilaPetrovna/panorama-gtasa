@@ -408,7 +408,7 @@ setGravity(0);
 
 for(t=0;t<tiles;t++){
 hilbert(t,level,&q,&w);
-
+if(q>=30 || w>=30){continue;}
 
 char filename[256];
 char status[256];
@@ -420,11 +420,14 @@ fclose(out);
 continue;
 }
 
+setGameFPSLimit(105);
 flyTo(q*step-3000+step/2,w*step-3000+step/2,111,drand()*360.0);
 *(float*)(cped+0x540)=99999.99; // health
 MessageJumpQ(status, 2000, 0, false);
 setVolumeSfx(64);
-Sleep(5000);
+Sleep(4500);
+setGameFPSLimit(3);
+Sleep(500);
 if(GetAsyncKeyState(VK_F9)&1){goto finish;}
 
 // get data
@@ -441,6 +444,7 @@ if(mpx>=step || mpy>=step){continue;}
 curHeight=findGroundZForCoord(npx,npy);
 maptile[mpx+mpy*step]=curHeight;
 }
+Sleep(1);
 }
 
 curHeight+=10.0;
@@ -459,6 +463,7 @@ finish:
 
 MessageJumpQ("Map is done!", 1000, 0, false);
 restoreGravity();
+setGameFPSLimit(105);
 
 }
 
