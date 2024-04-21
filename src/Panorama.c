@@ -352,7 +352,6 @@ weatherID=drand()*23.0;
 forceWeatherNow(weatherID);
 rollTime();
 
-prepareFreeze();
 
 sx=drand()*5600.0-2800.0;
 sy=drand()*5600.0-2800.0;
@@ -366,8 +365,8 @@ if(rand()&1){
 speed*=-1;
 }
 
-flyTo(sx,sy,1000.0,drand()*360.0);
 
+prepareFreeze();
 
 // rotate cam and ticks clock
 for(q=0;q<duration;q++){
