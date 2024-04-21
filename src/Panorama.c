@@ -335,7 +335,7 @@ double jump;
 int duration;
 int weatherID;
 int q;
-double fov,speed,tth;
+double fov1,fov2,speed,tth,ph;
 void *cped=getPlayerCped();
 void *cped_xyz=*(void**)(cped+0x14); // matrix???
 
@@ -356,7 +356,16 @@ rollTime();
 sx=drand()*5600.0-2800.0;
 sy=drand()*5600.0-2800.0;
 flyTo(sx,sy,1000.0,drand()*360.0);
-fov=50.0+drand()*40.0;
+fov1=90.0-drand()*drand()*89.0;
+fov2=70.0-drand()*drand()*69.0;
+if(rand()&1){
+tth=fov1;
+fov1=fov2;
+fov2=tth;
+}
+
+// add moving across roads
+
 jump=drand()*3.0;
 sz=(*(float*)(cped_xyz+0x38))+jump;
 duration=(drand()*15.0*30.0+5.0*30.0)*2.0; // from 5 to 20 seconds
@@ -374,11 +383,13 @@ if(GetAsyncKeyState(VK_F7)&1){goto finished;}
 *clockSeconds++;
 
 tth=speed*q/1000.0/2.0;
+ph=(double)q/duration;
+
 tx=sx+sin(tth)*10.0;
 ty=sy+cos(tth)*10.0;
 tz=sz+cos(tth+123.45)*2.0;
 
-setCameraFromToFov(sx,sy,sz,tx,ty,tz,fov);
+setCameraFromToFov(sx,sy,sz,tx,ty,tz,fov2*ph+(1.0-ph)*fov1);
 Sleep(33);
 }
 }
