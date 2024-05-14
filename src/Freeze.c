@@ -70,7 +70,7 @@ frozen.volumeSfx=getVolumeSfx();
 *timeScale=0.0;
 *timeStep=0.0;
 
-cpedSetVisivility(frozen.cped, 0);
+cpedSetVisibility(frozen.cped, 0);
 
 *(char *)0x96916D=1; // Infinite Health
 *(char *)0x96916E=1; // Infinite Oxygen
@@ -113,7 +113,7 @@ setCameraFromState(frozen.camState);
 setGameFPSLimit(105);
 
 // Restore Player visibility
-cpedSetVisivility(frozen.cped, 1);
+cpedSetVisibility(frozen.cped, 1);
 
 // Restore audio, if any
 setVolumeSfx(frozen.volumeSfx);

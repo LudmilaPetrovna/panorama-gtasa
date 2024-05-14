@@ -211,7 +211,7 @@ setWindynessForCurrentWeather(0);
 setDrawingDistance(8000.0);
 *CTheScripts__bDisplayHud=0;
 *CHud__bScriptDontDisplayRadar=1;
-cpedSetVisivility(cped, 0);
+cpedSetVisibility(cped, 0);
 
 
 // First pass, precache
@@ -401,11 +401,11 @@ restoreFreeze();
 
 
 void cityScanner(){
-int q,w,a,s,e,t;
+uint32_t q,w;
+int a,s,e,t;
 int step=200;
 int npx,npy;
 int mpx,mpy;
-CVector *player_pos=getPlayerVector();
 float *maptile=malloc(step*step*sizeof(float));
 FILE *out;
 float lastHeight=300.0;
@@ -432,7 +432,7 @@ continue;
 
 setGameFPSLimit(105);
 flyTo(q*step-3000+step/2,w*step-3000+step/2,111,drand()*360.0);
-*(float*)(cped+0x540)=99999.99; // health
+cpedSetHealth(cped,99999.99); // health
 MessageJumpQ(status, 2000, 0, false);
 setVolumeSfx(64);
 Sleep(4500);

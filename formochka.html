@@ -1,6 +1,9 @@
 <style>
 select,fieldset,label{display:block;}
-
+select,input[type=text]{height:13px;font-family:'Fifaks 1.0 dev';padding:0px;}
+label,select,input{margin:0px;}
+label{margin:-1px 0px;}
+fieldset{margin:0px;padding:2px;}
 </style>
 
 
@@ -137,76 +140,6 @@ select,fieldset,label{display:block;}
 <label><input type=checkbox> Надеть парашют</label>
 </fieldset>
 
-
-
-
-<fieldset><legend>Настройки скриншотов</legend>
-<label> Название сохраняемого скриншота
-<input type=text value="pano-%dx%dx%d">
-<label>Подпрыгнуть над персонажем на: <input type=text size=5> метров
-<label>Угол обзора камеры: <input type=text size=5>
-<label>Размер скриншотов: <input type=text size=10 value="*LastScreenWidth)/(*LastScreenHeight)">
-<label>Предположительный размер: <input type=text size=10 value="20000 скринов, 32гб">
-
-
-<label>Режим:
-<select>
-<option>Одиночный скриншот
-<option>Таймлапс
-<option>Сферические панорамы
-<option>Коническую панораму
-<option>Цилиндрическую панораму
-</select>
-</label>
-
-Настройски сферической съемки:
-<label>Траектория движения камеры<select>
-<option>Спираль по сфере
-<option>Кубик (3d cube)
-<option>Спираль по плоскости в полярных координатах
-<option>Кривая гильберта по плоскости в полярных координатах
-<option>Поэтажная съемка
-<option>Изобразить спутник
-</select></label>
-<label><input type=checkbox> Разбить на сегменты по кривой Гильберта
-<label>Порядок разбиения кривой Гильберта (1..10) <input type=range>
-
-
-<fieldset><legend>Полезности</legend>
-<label><input type=checkbox> Отключить звуки+музыку на время скриншотинга</label>
-<label><input type=checkbox> Уведомлять звуком о окончании снятия скриншотов
-<label><input type=checkbox> Завершать игру после окончания снятия скриншотов
-</fieldset>
-
-<fieldset><legend>Настройка отсечения</legend>
-<label> min_х <input type=text></label>
-<label> max_х <input type=text></label>
-<label> min_Y <input type=text></label>
-<label> max_y <input type=text></label>
-</fieldset>
-
-<fieldset><legend>Пути</legend>
-<label> Директория для сохранения скриншотов:
-<input type=text value="pano-%dx%dx%d">
-<label><input type=checkbox> Перезаписывать картинки
-<label> Указать путь до Hugin/nona <input type=text value="V:\\h\\Hugin-2023.0.0-win64\\nona"></label>
-</fieldset>
-
-
-
-</fieldset>
-<fieldset><legend>Микрочиты:</legend>
-<label><input type=checkbox> Infinite Health
-<label><input type=checkbox> Infinite Oxygen
-<label><input type=checkbox> No wanted level
-<label><input type=checkbox> Передвигать персонажа в начальную точку
-<label><input type=checkbox> Отключить гравитацию
-</fieldset>
-
-
-
-
-
 <fieldset><legend>Настройка погоды</legend>
 <label>Выбрать время суток<input type=range></label>
 <label>Выбрать текущую погоду<input type=range></label>
@@ -251,8 +184,6 @@ select,fieldset,label{display:block;}
 <option>126 to 150: Horrible flashing red bugged weather.
 <option>151 to 175: Far draw distance weather with pink, purple and turquoise clouds.
 </select></label>
-<fieldset><legend>Тонкие настройки погоды</legend>
-<label><input type=checkbox> Выбрать вторую погоду
 <label>Выбрать переходную погоду<input type=range></label>
 <label>Погода: <select>
 <option>0	EXTRASUNNY_LA	
@@ -296,7 +227,6 @@ select,fieldset,label{display:block;}
 <option>151 to 175: Far draw distance weather with pink, purple and turquoise clouds.
 </select></label>
 <label>Уровень перехода погоды<input type=range></label>
-</fieldset>
 
 <fieldset><legend>Настройка солнца</legend>
 </fieldset>
@@ -306,6 +236,79 @@ select,fieldset,label{display:block;}
 </fieldset>
 
 </fieldset>
+
+
+
+
+<fieldset><legend>Настройки скриншотов</legend>
+<label> Название сохраняемого скриншота
+<input type=text value="pano-%dx%dx%d">
+<label>Подпрыгнуть над персонажем на: <input type=text size=5> метров
+<label>Угол обзора камеры: <input type=text size=5>
+<label>Размер скриншотов: <input type=text size=10 value="*LastScreenWidth)/(*LastScreenHeight)">
+<label>Предположительный размер: <input type=text size=10 value="20000 скринов, 32гб">
+
+
+<label>Режим:
+<select>
+<option>Одиночный скриншот
+<option>Таймлапс
+<option>Сферические панорамы
+<option>Коническую панораму
+<option>Цилиндрическую панораму
+</select>
+</label>
+
+Настройски сферической съемки:
+<label>Траектория движения камеры<select>
+<option>Спираль по сфере
+<option>Кубик (3d cube)
+<option>Спираль по плоскости в полярных координатах
+<option>Кривая гильберта по плоскости в полярных координатах
+<option>Поэтажная съемка
+<option>Изобразить спутник
+</select></label>
+<label><input type=checkbox> Разбить на сегменты по кривой Гильберта
+<label>Порядок разбиения кривой Гильберта (1..10) <input type=range>
+
+
+<fieldset><legend>Полезности</legend>
+<label><input type=checkbox> Отключить звуки+музыку на время скриншотинга</label>
+<label><input type=checkbox> Уведомлять звуком о окончании снятия скриншотов
+<label><input type=checkbox> Завершать игру после окончания снятия скриншотов
+</fieldset>
+
+<fieldset><legend>Настройка отсечения</legend>
+<table>
+<tr><td><label> min_х <input type=text></label>
+<label> max_х <input type=text></label>
+<td>
+<label> min_Y <input type=text></label>
+<label> max_y <input type=text></label>
+</table>
+</fieldset>
+
+<fieldset><legend>Пути</legend>
+<label> Директория для сохранения скриншотов:
+<input type=text value="pano-%dx%dx%d">
+<label><input type=checkbox> Перезаписывать картинки
+<label> Указать путь до Hugin/nona <input type=text value="V:\\h\\Hugin-2023.0.0-win64\\nona"></label>
+</fieldset>
+
+
+
+</fieldset>
+<fieldset><legend>Микрочиты:</legend>
+<label><input type=checkbox> Infinite Health
+<label><input type=checkbox> Infinite Oxygen
+<label><input type=checkbox> No wanted level
+<label><input type=checkbox> Передвигать персонажа в начальную точку
+<label><input type=checkbox> Отключить гравитацию
+</fieldset>
+
+
+
+
 
 
 

@@ -148,13 +148,16 @@ CPlaceable__SetHeading(cped,angle);
 //player_trans->m_fHeading=angle;
 }
 
-void cpedSetVisivility(void *cped, int state){
+void cpedSetVisibility(void *cped, int state){
 if(state){
 *(char *)(cped+0x474)&=~2; // remove bit "don't render"
 } else {
 *(char *)(cped+0x474)|=2; // set bit
 }
+}
 
+void cpedSetHealth(void *cped, float h){
+*(float*)(cped+0x540)=h; // health
 }
 
 char getVolumeSfx(){
