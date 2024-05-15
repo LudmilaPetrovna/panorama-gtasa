@@ -28,7 +28,7 @@ char getVolumeSfx();
 void setVolumeSfx(int vol);
 void playSoundId(int id, CVector *pos);
 void rollTime();
-void flyTo(float tx, float ty, float tz, float heading);
+void flyTo(float tx, float ty, float tz, float heading, int interior, int need_detect_land);
 void setCameraFromToFov(float sx, float sy, float sz, float tx, float ty, float tz, float fov);
 void setCameraFromState(CCamera *state);
 CVector *getPlayerVector();
@@ -104,6 +104,9 @@ extern int *screenHudMenuHeight;
 
 extern float *timeScale;
 extern float *timeStep;
+extern float *timeStepMin;
+extern float *timeStepNonClippedMin;
+
 extern char *codePause;
 extern char *userPause;
 

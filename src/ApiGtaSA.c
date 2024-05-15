@@ -55,6 +55,9 @@ char *CHud__bScriptDontDisplayRadar=(char*)0xBAA3FB;;
 
 float *timeScale=(float*)0xB7CB64;
 float *timeStep=(float*)0xB7CB5C;
+float *timeStepMin=(float*)(0x5619AF+6);
+float *timeStepNonClippedMin=(float*)(561967+6);
+
 char *codePause=(char*)0xB7CB48;
 char *userPause=(char*)0xB7CB49;
 
@@ -184,13 +187,17 @@ sprintf(screenMessage,"Time: %02d:%02d:%02d",*clockHours,*clockMinutes,*clockSec
 MessageJumpQ(screenMessage, 10000, 0, false);
 }
 
-void flyTo(float tx, float ty, float tz, float heading){
-
+void flyTo(float tx, float ty, float tz, float heading, int interior, int need_detect_land){
 setGravity(0);
 void *cped=getPlayerCped();
 CVector *player_pos=getPlayerVector();
 float th=heading/180.0*M_PI;
 float fx=player_pos->x,fy=player_pos->y,fz=player_pos->z,fh=CPlaceable__GetHeading(cped);
+
+
+*(int*)0xB72914=interior; // currentArea
+*(char*)(cped+0x2F)=interior; //linked with
+CStreaming__RemoveBuildingsNotInArea(interior);
 
 float dist=sqrt(pow(fx-tx,2)+pow(fy-ty,2)+pow(fz-tz,2));
 int steps=dist/10.0+1;
@@ -208,9 +215,10 @@ waitNFrames(1);
 }
 
 // slow landing
-if(tz>100 || tz<-100){
+if(need_detect_land){
 tz=findGroundZForCoord(tx,ty)+2.0;
 }
+
 for(q=10;q>=0;q--){
 player_pos->x=tx;
 player_pos->y=ty;

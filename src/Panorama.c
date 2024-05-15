@@ -355,7 +355,7 @@ rollTime();
 
 sx=drand()*5600.0-2800.0;
 sy=drand()*5600.0-2800.0;
-flyTo(sx,sy,1000.0,drand()*360.0);
+flyTo(sx,sy,1000.0,drand()*360.0,0,1);
 fov1=90.0-drand()*drand()*89.0;
 fov2=70.0-drand()*drand()*69.0;
 if(rand()&1){
@@ -400,9 +400,14 @@ restoreFreeze();
 }
 
 
+
+
+
 void cityScanner(){
+// Летаем над городом по кривой Гильберта и строим карту высот. Часто вылетаем. Вообще, это был одноразовый таск, потому с терпением и такой-то матерью я снова и снова запускал игрушку, пока не сделал всю карту высот.
+
 uint32_t q,w;
-int a,s,e,t;
+int a,s,t;
 int step=200;
 int npx,npy;
 int mpx,mpy;
@@ -431,7 +436,7 @@ continue;
 }
 
 setGameFPSLimit(105);
-flyTo(q*step-3000+step/2,w*step-3000+step/2,111,drand()*360.0);
+flyTo(q*step-3000+step/2,w*step-3000+step/2,111,drand()*360.0,0,1);
 cpedSetHealth(cped,99999.99); // health
 MessageJumpQ(status, 2000, 0, false);
 setVolumeSfx(64);
@@ -495,50 +500,19 @@ playSoundId(1083,&pos);
 
 static int is_pause=1;
 is_pause^=1;
+
+// patch game code
+*timeStepMin=0.0;
+*timeStepNonClippedMin=0.0;
+*(float*)(0x00858C14)=0.000000001;
+
 if(is_pause){
 *timeScale=0.0;
 *timeStep=0.0;
 
-float *CTimer_ms_fTimeStepNonClipped=(float*)0xB7CB58;
-float *CTimer_ms_fTimeStep=(float*)0xB7CB5C;
-float *CTimer_ms_fTimeScale=(float*)0xB7CB64;
-unsigned int *CTimer_m_snPreviousTimeInMilliseconds=(unsigned int*)0xB7CB78;
-unsigned int *CTimer_m_snTimeInMillisecondsPauseMode=(unsigned int*)0xB7CB7C;
-unsigned int *CTimer_m_snTimeInMillisecondsNonClipped=(unsigned int*)0xB7CB80;
-unsigned int *CTimer_m_snTimeInMilliseconds=(unsigned int*)0xB7CB84;
-unsigned int *CTimer_m_snPPPPreviousTimeInMilliseconds=(unsigned int*)0xB7CB6C;
-unsigned int *CTimer_m_snPPPreviousTimeInMilliseconds=(unsigned int*)0xB7CB70;
-unsigned int *CTimer_m_snPPreviousTimeInMilliseconds=(unsigned int*)0xB7CB74;
-unsigned int *CTimer_m_snPreviousTimeInMillisecondsNonClipped=(unsigned int*)0xB7CB68;
-float *CTimer_ms_fOldTimeStep=(float*)0xB7CB54;
-
-int *_renderTimerPauseCoun=(int*)0xB7CB44;
-int *_renderStartTimeLow=(int*)0xB7CB38;
-int *_renderStartTimeHigh=(int*)0xB7CB3C;
-
-*CTimer_ms_fTimeStepNonClipped=0;
-*CTimer_ms_fTimeStep=0;
-*CTimer_ms_fTimeScale=0;
-*CTimer_m_snPreviousTimeInMilliseconds=0;
-*CTimer_m_snTimeInMillisecondsPauseMode=0;
-*CTimer_m_snTimeInMillisecondsNonClipped=0;
-*CTimer_m_snTimeInMilliseconds=0;
-*CTimer_m_snPPPPreviousTimeInMilliseconds=0;
-*CTimer_m_snPPPreviousTimeInMilliseconds=0;
-*CTimer_m_snPPreviousTimeInMilliseconds=0;
-*CTimer_m_snPreviousTimeInMillisecondsNonClipped=0;
-*CTimer_ms_fOldTimeStep=0;
-
-*_renderTimerPauseCoun=0;
-*_renderStartTimeLow=0;
-*_renderStartTimeHigh=0;
-
-setVolumeSfx(0);
-
 } else {
 *timeScale=1.0;
 *timeStep=1.0;
-setVolumeSfx(64);
 
 }
 
@@ -546,7 +520,7 @@ setVolumeSfx(64);
 }
 
 if(GetAsyncKeyState(VK_F5)&1){
-flyTo(181.1962, 1266.635, 22.0121, 346.0);
+flyTo(181.1962, 1266.635, 22.0121, 346.0,0,0);
 forceWeatherNow(19);
 rollTime();
 //*((float*)0xC812F0)=1000000.0;// bending value &CWeather::Wind 
@@ -574,23 +548,13 @@ createPano();
 }
 
 if(GetAsyncKeyState(VK_F8)&1){
-//float haveZ=findGroundZForCoord(places[places_current].x,places[places_current].y);
-//requestCollision(&newpos,0xB72914);
-
-void *cped=getPlayerCped();
-int interior=places[places_current].interior;
-
-*(int*)0xB72914=interior; // currentArea
-*(char*)(cped+0x2F)=interior; //linked width
-CStreaming__RemoveBuildingsNotInArea(interior);
-flyTo(places[places_current].x,places[places_current].y,places[places_current].z,places[places_current].heading);
-
+flyTo(places[places_current].x,places[places_current].y,places[places_current].z,places[places_current].heading,places[places_current].interior,0);
 places_current++;
 places_current%=places_count;
 }
 
 if(GetAsyncKeyState(VK_F9)&1){
-flyTo(drand()*5000.0-2500.0,drand()*5000.0-2500.0,1000.0,drand()*360.0);
+flyTo(drand()*5000.0-2500.0,drand()*5000.0-2500.0,1000.0,drand()*360.0,0,1);
 }
 
 if(GetAsyncKeyState(VK_F10)&1){
