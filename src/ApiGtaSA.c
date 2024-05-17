@@ -269,3 +269,11 @@ theCamera->m_vecFixedModeSource.z=state->m_vecFixedModeSource.z;
 theCamera->m_fFOVNew=state->m_fFOVNew;
 }
 
+void setCameraProjection(int t){
+// t=1 = pespective
+// t=2 = parallel
+void *scene=(void*)0xC17038;
+void *rwcam=*(void**)(scene+4);
+*(int*)(rwcam+0x14)=t;
+}
+

@@ -564,8 +564,45 @@ sprintf(tmp,"New weather ID: %d",weatherID);
 MessageJumpQ(tmp, 10000, 0, false);
 }
 
+if(GetAsyncKeyState(VK_NUMPAD2)&1){
+flyTo(-944.0,2224.0,40.6,90,0,0);
+}
+
+if(GetAsyncKeyState(VK_NUMPAD3)&1){
+void *water=(void*)0xC22910;
+int water_vertex_size=20;
+int q;
+float newlevel=drand()*50.0+20.0;
+for(q=0;q<1200;q++){
+*(float*)(water+q*water_vertex_size+4)=newlevel;
+}
+MessageJumpQ("sea level changed", 1000, 0, false);
+}
+
+
+if(GetAsyncKeyState(VK_NUMPAD4)&1){
+CVector *pos=getPlayerVector();
+void *water=(void*)0xC22910;
+int water_vertex_size=20;
+int q;
+float newlevel=pos->z+1.0;
+for(q=0;q<1200;q++){
+*(float*)(water+q*water_vertex_size+4)=newlevel;
+}
+MessageJumpQ("sea level changed", 1000, 0, false);
+}
+
+
 
 if(GetAsyncKeyState(VK_F11)&1){
+void *scene=(void*)0xC17038;
+void *rwcam=*(void**)(scene+4);
+*(int*)(rwcam+0x14)=2;
+MessageJumpQ("parallel", 1000, 0, false);
+
+continue;
+
+
 /*
 *sunCoreBlue=drand()*255.0;
 *sunCoreGreen=drand()*255.0;
