@@ -589,6 +589,13 @@ float newlevel=pos->z+1.0;
 for(q=0;q<1200;q++){
 *(float*)(water+q*water_vertex_size+4)=newlevel;
 }
+/*
+      <Description>"WAVENESS_DEFAULT"</Description>
+      <Address>72C659+6</Address>
+
+      <Description>"CWeather_Wavyness"</Description>
+      <Address>C812E8</Address>
+*/
 MessageJumpQ("sea level changed", 1000, 0, false);
 }
 
