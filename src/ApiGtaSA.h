@@ -53,6 +53,53 @@ extern void forceWeatherNow(short weatherType);
 extern void __thiscall reportMissionAudioEvent(void *t, int id, CVector *coords);
 extern void __thiscall setEffectsMasterVolume(void *t, char volume);
 
+extern void __cdecl CPointLights__AddLight(char type,
+        float x,
+        float y,
+        float z,
+        float dir_x,
+        float dir_y,
+        float dir_z,
+        float radius,
+        float r,
+        float g,
+        float b,
+        char fogType,
+        char generateExtraShadows,
+        int attachedTo);
+
+extern int CTheScripts__AddScriptSearchLight(float startX, float startY, float startZ, CEntity *entity, float targetX, float targetY, float targetZ, float targetRadius, float baseRadius);
+extern void __cdecl AddAnExtraDirectionalLight(void *RwWorld, float x, float y, float z, float red, float green, float blue);
+void __cdecl CCoronas__RegisterCorona(
+        int id,
+        void *entity,
+        unsigned __int8 r,
+        unsigned __int8 g,
+        unsigned __int8 b,
+        unsigned __int8 alpha,
+        CVector *pos,
+        float radius,
+        float farClip,
+        void *texture,
+        char flare,
+        char enableReflection,
+        char checkObstacles,
+        int notUsed,
+        float angle,
+        char longDistance,
+        float nearClip,
+        char fadeState,
+        float fadeSpeed,
+        char onlyFromBelow,
+        char reflectionDelay);
+
+
+extern int __cdecl CShadows__StoreStaticShadow(unsigned int id, unsigned char type, void* texture, CVector* posn,
+float frontX, float frontY, float sideX, float sideY, short intensity,
+unsigned char red, unsigned char green, unsigned char blue, float zDistance,
+float scale, float drawDistance, bool temporaryShadow, float upDistance);
+
+
 extern void __cdecl CGameLogic__RestorePlayerStuffDuringResurrection(void *player, float x, float y, float z, float angle);
 extern void __cdecl CStreaming__RemoveBuildingsNotInArea(int AreaCode);
 

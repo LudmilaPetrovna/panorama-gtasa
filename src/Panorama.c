@@ -538,6 +538,118 @@ if(GetAsyncKeyState(VK_NUMPAD1)&1){
 cityScanner();
 }
 
+if(GetAsyncKeyState(VK_NUMPAD5)&1){
+MessageJumpQ("add light", 1000, 0, false);
+CVector *pos=getPlayerVector();
+
+
+//CTheScripts__AddScriptSearchLight(pos->x,pos->y,pos->z+2.0,0,pos->x,pos->y,pos->z, 10.0, 0.0);
+
+/*bool CShadows::StoreStaticShadow(unsigned int id, unsigned char type, RwText
+ure* texture, CVector* posn, float frontX, float frontY, float sideX, float s
+ideY, short intensity, unsigned char red, unsigned char green, unsig
+ned char blue, float zDistane, float scale, float drawDistance, bool temporary
+Shadow, float upDistance) {
+*/
+CShadows__StoreStaticShadow(
+                0,
+                2,
+                (void*)0xC403F4,
+                pos,
+                2.0,
+                0.0,
+                0.0,
+                -2.0,
+                128,
+                255,
+                0,
+                0,
+                4.0,
+                1.0,
+                40.0,
+                0,
+                0.0);
+
+//AddAnExtraDirectionalLight((void*)0xC17038, pos->x,pos->y,pos->z+2.0, 1.0, 0.0, 0.0);
+
+
+CVector up;
+up.x=1;
+up.y=1;
+up.z=1.0;
+/*
+void CCoronas::RegisterCorona(unsigned int nID, CEntity* pAttachTo, unsigned char R,.
+unsigned char G, unsigned char B, unsigned char A, const CVector& Position, float Size,
+ float Range, RwTexture* pTex, unsigned char flareType, unsigned char reflectionType,
+ unsigned char LOSCheck, unsigned char unused, float normalAngle, bool bNeonFade,
+ float PullTowardsCam, bool bFadeIntensity, float FadeSpeed, bool bOnlyFromBelow,
+ bool bWhiteCore)
+*/
+
+CCoronas__RegisterCorona(
+        5001, // uniq id
+        getPlayerCped(), // attach to
+        255,
+        0,
+        0,
+        0xFF,
+        &up,
+        5.5,
+        9999.88,
+        0, // CORONATYPE_SHINYSTAR
+        1,
+        1,
+        0,
+        0, // not used
+        0.0, // not used
+        0,
+        .5,
+        0,
+        150.0,
+        0,
+        0);
+
+/*
+CPointLights__AddLight(
+0,
+        pos->x,
+        pos->y,
+        pos->z+drand()*3.0,
+        0, // dir
+        0,
+        0,
+        5.0, // radius
+        1.0, // rgb
+        0,
+        0,
+        0, // fog
+        1,
+        0);
+*/
+}
+
+if(GetAsyncKeyState(VK_NUMPAD6)&1){
+MessageJumpQ("add light random", 1000, 0, false);
+CVector *pos=getPlayerVector();
+
+CPointLights__AddLight(
+0,
+        pos->x+drand()*3.0,
+        pos->y+drand()*3.0,
+        pos->z+drand()*3.0,
+        drand(), // dir
+        drand(),
+        drand(),
+        drand()*5.0, // radius
+        drand(), // rgb
+        drand(),
+        drand(),
+        0, // fog
+        0,
+        0);
+
+}
+
 
 if(GetAsyncKeyState(VK_F6)&1){
 rollTime();
@@ -603,8 +715,10 @@ MessageJumpQ("sea level changed", 1000, 0, false);
 
 if(GetAsyncKeyState(VK_F11)&1){
 void *scene=(void*)0xC17038;
-void *rwcam=*(void**)(scene+4);
-*(int*)(rwcam+0x14)=2;
+void *rwcam=*(void**)(scene+4); // 0183ECCC   
+*(int*)(rwcam+0x14)=2; // projection type
+//*(int*)(rwcam+0x20)=2; // view matrix
+
 MessageJumpQ("parallel", 1000, 0, false);
 
 continue;
