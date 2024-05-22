@@ -436,7 +436,7 @@ continue;
 }
 
 setGameFPSLimit(105);
-flyTo(q*step-3000+step/2,w*step-3000+step/2,111,drand()*360.0,0,1);
+flyTo((int)q*step-3000+step/2,(int)w*step-3000+step/2,111,drand()*360.0,0,1);
 cpedSetHealth(cped,99999.99); // health
 MessageJumpQ(status, 2000, 0, false);
 setVolumeSfx(64);
@@ -573,10 +573,6 @@ CShadows__StoreStaticShadow(
 //AddAnExtraDirectionalLight((void*)0xC17038, pos->x,pos->y,pos->z+2.0, 1.0, 0.0, 0.0);
 
 
-CVector up;
-up.x=1;
-up.y=1;
-up.z=1.0;
 /*
 void CCoronas::RegisterCorona(unsigned int nID, CEntity* pAttachTo, unsigned char R,.
 unsigned char G, unsigned char B, unsigned char A, const CVector& Position, float Size,
@@ -586,18 +582,26 @@ unsigned char G, unsigned char B, unsigned char A, const CVector& Position, floa
  bool bWhiteCore)
 */
 
+
+CVector *corona_pos=malloc(sizeof(CVector));
+corona_pos->x=drand()*10.0-5.0;
+corona_pos->y=drand()*10.0-5.0;
+corona_pos->z=drand()*10.0;
+
+static int corona_id=5000;
+
 CCoronas__RegisterCorona(
-        5001, // uniq id
+        corona_id++, // uniq id
         getPlayerCped(), // attach to
         255,
         0,
         0,
         0xFF,
-        &up,
+        corona_pos,
         5.5,
         9999.88,
         0, // CORONATYPE_SHINYSTAR
-        1,
+        0,
         1,
         0,
         0, // not used
