@@ -696,6 +696,46 @@ MessageJumpQ("sea level changed", 1000, 0, false);
 }
 
 
+
+if(GetAsyncKeyState(VK_NUMPAD9)&1){
+CVector *pos=getPlayerVector();
+pos->x=drand()*6000.0-3000.0;
+pos->y=drand()*6000.0-3000.0;
+pos->z=100.0;
+static char newposlabel[256];
+sprintf(newposlabel,"CJ moved to %.3fx%.3fx%.3f",pos->x,pos->y,pos->z);
+MessageJumpQ(newposlabel, 1000, 0, false);
+}
+
+if(GetAsyncKeyState(VK_NUMPAD8)&1){
+flyTo(1184.3,-1313.4,19.7,0,0,1);
+setCameraFromToFov(1184.3,-1313.4,19.7,1183.6,-1314.0,19.32,50.0);
+MessageJumpQ("very long distance", 1000, 0, false);
+}
+
+
+if(GetAsyncKeyState(VK_NUMPAD7)&1){
+
+// remove intro tutorials
+// restarts count
+*(char*)0xA4326C=1;
+*(char*)0xA43268=1;
+
+// possible help_wasted_shown
+*(uint32_t*)0xA49b3c=1;
+
+// help_busted
+*(uint32_t*)0xA49b58=1;
+
+// remove hospital_pickup1-2
+CPickups__RemovePickUp(*(uint32_t*)0xA4d534);
+CPickups__RemovePickUp(*(uint32_t*)0xA4d538);
+CPickups__RemovePickUp(*(uint32_t*)0xA4d53c);
+
+MessageJumpQ("police/hospital restars patched", 1000, 0, false);
+}
+
+
 if(GetAsyncKeyState(VK_NUMPAD4)&1){
 CVector *pos=getPlayerVector();
 void *water=(void*)0xC22910;

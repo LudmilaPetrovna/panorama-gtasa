@@ -99,6 +99,7 @@ float frontX, float frontY, float sideX, float sideY, short intensity,
 unsigned char red, unsigned char green, unsigned char blue, float zDistance,
 float scale, float drawDistance, bool temporaryShadow, float upDistance);
 
+extern void __cdecl CPickups__RemovePickUp(uint16_t handle);
 
 extern void __cdecl CGameLogic__RestorePlayerStuffDuringResurrection(void *player, float x, float y, float z, float angle);
 extern void __cdecl CStreaming__RemoveBuildingsNotInArea(int AreaCode);
