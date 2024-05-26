@@ -1,7 +1,10 @@
+#include <stdint.h>
+#include <stdbool.h>
+#include <stdlib.h>
+
 
 #ifndef API_GTA_SAN_ANDREAS
 #define API_GTA_SAN_ANDREAS
-
 
 typedef struct _CVector CVector;
 typedef struct _CMatrix CMatrix;
@@ -12,6 +15,8 @@ typedef struct _CCam CCam;
 typedef struct _CCamera CCamera;
 typedef struct _CEntity CEntity;
 typedef struct _FxManager_c FxManager_c;
+typedef struct _CQuaternion CQuaternion;
+typedef struct _CPhysical CPhysical;
 #include "convCVector.h"
 #include "convCMatrix.h"
 #include "convCSimpleTransform.h"
@@ -21,9 +26,13 @@ typedef struct _FxManager_c FxManager_c;
 #include "convCCamera.h"
 #include "convCEntity.h"
 #include "convFxManager_c.h"
+#include "convCQuaternion.h"
+#include "convCPhysical.h"
+#include "convCObject.h"
 
 
 // my useful funcs
+double drand_num(double max);
 char getVolumeSfx();
 void setVolumeSfx(int vol);
 void playSoundId(int id, CVector *pos);
@@ -97,7 +106,7 @@ void __cdecl CCoronas__RegisterCorona(
 extern int __cdecl CShadows__StoreStaticShadow(unsigned int id, unsigned char type, void* texture, CVector* posn,
 float frontX, float frontY, float sideX, float sideY, short intensity,
 unsigned char red, unsigned char green, unsigned char blue, float zDistance,
-float scale, float drawDistance, bool temporaryShadow, float upDistance);
+float scale, float drawDistance, char temporaryShadow, float upDistance);
 
 extern void __cdecl CPickups__RemovePickUp(uint16_t handle);
 
@@ -123,13 +132,27 @@ extern float *CRenderer_ms_lodDistScale;
 extern float *CRenderer_ms_fCameraHeading;
 
 
+extern void __cdecl CStreaming__RequestModel(signed int dwModelId, int flags);
+extern void __cdecl CStreaming__LoadAllRequestedModels(char bOnlyPriorityRequests);
+extern void __cdecl CStreaming__SetMissionDoesntRequireModel(int index);
+
+extern void __cdecl CTimer__Resume();
+extern void __cdecl CTimer__Suspend();
+extern void* __cdecl CObject__Create(int modelId);
+extern void __cdecl CWorld__Add(CEntity *entity);
+extern CObject* __stdcall CPool_CObject___AtHandle(int handle);
+extern void* __thiscall CPlaceable__setPosition(CPlaceable *this, CVector *pos);
+
 volatile extern int *CTimer_m_FrameCounter;
 volatile extern float *CTimer_game_FPS;
 
 extern char *CTheScripts__bDisplayHud;
 extern char *CHud__bScriptDontDisplayRadar;
+extern float *CHud__textBoxNumLines;
+extern int *CHud__helpMessageState;
 
 
+extern uint32_t *CStreaming__memoryAvailable;
 
 // don't work for me
 extern void __cdecl JPegCompressScreenToFile(void *rwcamera, const char *filename);

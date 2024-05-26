@@ -8,6 +8,7 @@
 
 #include "ApiGtaSA.h"
 #include "Freeze.h"
+#include "SpawnObject.h"
 #include "hilbert.h"
 
 // TODO: add more fun points of game, game is so beautiful!
@@ -489,6 +490,12 @@ DWORD WINAPI MyASIThread(LPVOID lpParam){
 
 while(1){
 
+
+if(*codePause || *codePause){ // game not active
+Sleep(100);
+continue;
+}
+
 if(GetAsyncKeyState(VK_F4)&1){
 
 CVector pos;
@@ -715,6 +722,11 @@ MessageJumpQ("very long distance", 1000, 0, false);
 
 
 if(GetAsyncKeyState(VK_NUMPAD7)&1){
+
+spawnBox();
+
+
+continue;
 
 // add green color to skybox
 static uint8_t green_color_to_skybox1[]={0xB9, 0x00, 0xFF, 0x00, 0xFF, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90};

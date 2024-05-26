@@ -40,6 +40,9 @@ float *weatherWindynessForWeatherID=(float*)0x8D5E50;
 float *CRenderer_ms_lodDistScale=(float*)0x8CD800;
 float *CRenderer_ms_fCameraHeading=(float*)0xB7684C; // (-pi ... +pi)
 
+uint32_t *CStreaming__memoryAvailable=(uint32_t*)0x8A5A80;
+
+
 volatile int *CTimer_m_FrameCounter=(int*)0xB7CB4C;
 volatile float *CTimer_game_FPS=(float*)0xB7CB50;
 
@@ -51,6 +54,8 @@ char *darknessEnable=(char*)(0xc402c4);
 
 char *CTheScripts__bDisplayHud=(char*)0xA444A0;
 char *CHud__bScriptDontDisplayRadar=(char*)0xBAA3FB;;
+float *CHud__textBoxNumLines=(float*)0xBAA460;
+int *CHud__helpMessageState=(int*)0xBAA474;
 
 
 float *timeScale=(float*)0xB7CB64;
@@ -175,7 +180,7 @@ void playSoundId(int id, CVector *pos){
 reportMissionAudioEvent((void*)0xB6BC90,id,pos);
 }
 
-static double drand_num(double max){
+double drand_num(double max){
 return((double)rand()/RAND_MAX*max);
 }
 
