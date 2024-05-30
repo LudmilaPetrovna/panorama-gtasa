@@ -19,10 +19,11 @@ void spawnObject(int id, float x, float y, float z){
 0249(585)                MARK_MODEL_AS_NO_LONGER_NEEDED iModel
 08D2(2258)               SET_OBJECT_SCALE hObj fScale
 */
-CStreaming__RequestModel(id, 12);
-CTimer__Suspend();
-CStreaming__LoadAllRequestedModels(0);
-CTimer__Resume();
+//CStreaming__RequestModel(id, 12);
+//CTimer__Suspend();
+//CStreaming__LoadAllRequestedModels(0);
+//CTimer__Resume();
+/*
 CObject *h=CObject__Create(id);
 CEntity *e=&h->PARENT.PARENT;
 CVector pos;
@@ -30,22 +31,28 @@ pos.x=x;
 pos.y=y;
 pos.z=z;
 
-h->PARENT.m_fMass=20.0;
-h->PARENT.m_vecForce.x=drand()-.5;
-h->PARENT.m_vecForce.y=drand()-.5;
-h->PARENT.m_vecForce.z=3.0;
+h->PARENT.m_fMass=2.0;
+*/
+/*
+h->PARENT.m_vecMoveSpeed.x=drand()-.5;
+h->PARENT.m_vecMoveSpeed.y=drand()-.5;
+h->PARENT.m_vecMoveSpeed.z=-.1;
+h->PARENT.m_nLastCollisionTime=1;
 
 h->PARENT.PARENT.m_bUsesCollision=1;
 h->PARENT.PARENT.m_bIsStatic=0;
-h->m_fScale=3.0;
+h->PARENT.PARENT.m_bHasContacted=1;
+h->PARENT.PARENT.m_bHasHitWall=1;
 
-CPlaceable__setPosition(&e->PARENT,&pos);
+h->m_fScale=3.0;
+*/
+//CPlaceable__setPosition(&e->PARENT,&pos);
 //      CPlaceable::SetOrientation(&v21->physical.entity.placeable, 0.0, 0.0, 0.0);
 //Entity__UpdateRW_(&h->physical.entity);
 //CEntity__UpdateRwFrame(&h->physical.entity);
 //???  CMissionCleanup::AddEntityToList(&CTheScripts::MissionCleanUp, handle, 3);
-CWorld__Add(e);
-CStreaming__SetMissionDoesntRequireModel(id);
+//CWorld__Add(e);
+//CStreaming__SetMissionDoesntRequireModel(id);
 //CPool_CObject___AtHandle(h)->m_fScale=3.0;
 }
 
