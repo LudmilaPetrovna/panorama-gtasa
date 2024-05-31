@@ -63,8 +63,12 @@ float *timeStep=(float*)0xB7CB5C;
 float *timeStepMin=(float*)(0x5619AF+6);
 float *timeStepNonClippedMin=(float*)(561967+6);
 
+char *menuActive=(char*)0xBA6748+0x5C;
 char *codePause=(char*)0xB7CB48;
 char *userPause=(char*)0xB7CB49;
+void **CWorld__Players=(void**)0xB7CD98;
+uint8_t *CWorld__PlayerInFocus=(uint8_t*)0xB7CD74;
+
 
 volatile unsigned short *clockSeconds=(unsigned short *)0xB70150;
 volatile unsigned char *clockMinutes=(unsigned char *)0xB70152;
@@ -143,8 +147,10 @@ return(player_pos);
 }
 
 void *getPlayerCped(){
-void *player_info=(void*)(0xB7CD98); // (CPlayerInfo *)0xB7CD98
-void *cped=*(void**)(player_info+0); // CPlayerPed -> CPed -> CPhysical -> CEntity -> CPlaceable
+void *cped=NULL,*player_info=(void*)(0xB7CD98); // (CPlayerInfo *)0xB7CD98
+if(player_info){
+cped=*(void**)(player_info+0); // CPlayerPed -> CPed -> CPhysical -> CEntity -> CPlaceable
+}
 return cped;
 }
 

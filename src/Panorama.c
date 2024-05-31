@@ -491,7 +491,9 @@ DWORD WINAPI MyASIThread(LPVOID lpParam){
 while(1){
 
 
-if(*codePause || *codePause){ // game not active
+if(*userPause || *codePause || *menuActive || *CTimer_m_FrameCounter<50){ // game not active
+
+//getPlayerCped()
 Sleep(100);
 continue;
 }
@@ -542,7 +544,7 @@ playSoundId(1083,&pos);
 }
 
 if(GetAsyncKeyState(VK_NUMPAD1)&1){
-cityScanner();
+//cityScanner();
 }
 
 if(GetAsyncKeyState(VK_NUMPAD5)&1){
@@ -667,7 +669,7 @@ rollTime();
 }
 
 if(GetAsyncKeyState(VK_F7)&1){
-createPano();
+//createPano();
 }
 
 if(GetAsyncKeyState(VK_F8)&1){
@@ -715,6 +717,12 @@ MessageJumpQ(newposlabel, 1000, 0, false);
 }
 
 if(GetAsyncKeyState(VK_NUMPAD8)&1){
+
+static char newposlabelplcped[256];
+sprintf(newposlabelplcped,"Cped: %p",getPlayerCped());
+MessageBox(NULL,"CPED",newposlabelplcped,0);
+
+continue;
 flyTo(1184.3,-1313.4,19.7,0,0,1);
 setCameraFromToFov(1184.3,-1313.4,19.7,1183.6,-1314.0,19.32,50.0);
 MessageJumpQ("very long distance", 1000, 0, false);
@@ -722,9 +730,32 @@ MessageJumpQ("very long distance", 1000, 0, false);
 
 
 if(GetAsyncKeyState(VK_NUMPAD7)&1){
+static int is_player_frozen=0;
+is_player_frozen^=1;
 
-spawnBox();
+memset((void*)0x531155,0x90,5);
 
+CPlayerInfo__MakePlayerSafe(&CWorld__Players[*CWorld__PlayerInFocus],is_player_frozen,10.0);
+
+if(is_player_frozen){
+*(uint8_t*)(0x6194A0)=0xC3;// ret
+memset((void*)0x541DD7,0x90,5);
+DIReleaseMouse();
+
+void *pad=CPad__GetPad(0);
+if(pad){
+*(int*)(pad+0x10E)=1;
+}
+
+} else {
+*(uint8_t*)(0x6194A0)=0xE9;// jmp
+memcpy((void*)0x541DD7, (char*)"\xE8\xE4\xD5\xFF\xFF", 5);
+}
+
+
+static char msg[256];
+sprintf(msg,"now is_player_frozen: %d\n",is_player_frozen);
+MessageJumpQ(msg, 1000, 0, false);
 
 continue;
 

@@ -178,8 +178,15 @@ extern float *timeStep;
 extern float *timeStepMin;
 extern float *timeStepNonClippedMin;
 
+extern char *menuActive;
 extern char *codePause;
 extern char *userPause;
+extern void **CWorld__Players;
+extern uint8_t *CWorld__PlayerInFocus;
+extern void __thiscall CPlayerInfo__MakePlayerSafe(void *playerInfo, char canMove, float radius);
+
+extern void* DIReleaseMouse();
+extern void* __cdecl CPad__GetPad(int number);
 
 volatile extern unsigned short *clockSeconds;
 volatile extern unsigned char *clockMinutes;
