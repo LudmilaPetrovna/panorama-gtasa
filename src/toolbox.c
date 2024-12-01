@@ -13,18 +13,18 @@ void work_at_background(){
 }
 
 void apply_game_filters(FILTERS_PARAMS *p){
-*(char)0xC7C70C=p->vidcam;
-*(char)0xC7C70D=p->liftcam;
-*(char)0xC402b4=p->grain;
-*(char)0xC402b7=p->cutscene;
-*(char)0xC402b8=p->nightvision;
-*(char)0xC402b9=p->infravision;
-*(char)0xC402ba=p->heat;
-*(char)0xC402D1=p->rain;
-*(char)0xC402D2=p->smokey;
-*(char)0xC402D3=p->underwater;
-*(char)0xC402C5=p->cctv;
-*(unsigned char)0xC402C4=p->darkness;
+*(char*)0xC7C70C=p->vidcam;
+*(char*)0xC7C70D=p->liftcam;
+*(char*)0xC402b4=p->grain;
+*(char*)0xC402b7=p->cutscene;
+*(char*)0xC402b8=p->nightvision;
+*(char*)0xC402b9=p->infravision;
+*(char*)0xC402ba=p->heat;
+*(char*)0xC402D1=p->rain;
+*(char*)0xC402D2=p->smokey;
+*(char*)0xC402D3=p->underwater;
+*(char*)0xC402C5=p->cctv;
+*(unsigned char*)0xC402C4=p->darkness;
 }
 
 
