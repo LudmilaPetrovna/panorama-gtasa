@@ -841,6 +841,14 @@ MessageJumpQ("sea level changed", 1000, 0, false);
 
 
 if(GetAsyncKeyState(VK_F11)&1){
+
+*(char*)0x007453F0=0xc3;
+*(char*)0x0057C520=0xc3;
+
+MessageJumpQ("no mouse patched!", 1000, 0, false);
+
+continue;
+
 void *scene=(void*)0xC17038;
 void *rwcam=*(void**)(scene+4); // 0183ECCC   
 *(int*)(rwcam+0x14)=2; // projection type
