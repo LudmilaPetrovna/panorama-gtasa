@@ -1,11 +1,11 @@
 typedef struct _CPed{
-char PADDING[312]
-/*(0x0138 (+348) 1,type=CAEPedAudioEntity) */     CAEPedAudioEntity			m_pedAudio;
-/*(0x0294 (+256) 1,type=CAEPedSpeechAudioEntity) */     CAEPedSpeechAudioEntity		m_pedSpeech;
-/*(0x0394 (+168) 1,type=CAEWeaponAudioEntity) */     CAEWeaponAudioEntity		m_weaponAudio;
-/*(0x043c (+36) 1,type=char) */     char field_43C[36];
-/*(0x0460 (+8) 1,type=char) */     char field_460[8];
-/*(0x0468 (+4) 1,type=int) */     int field_468;
+/*(0x0138 (+348) 1,type=CAEPedAudioEntity) */ //    CAEPedAudioEntity			m_pedAudio;
+/*(0x0294 (+256) 1,type=CAEPedSpeechAudioEntity) */  //   CAEPedSpeechAudioEntity		m_pedSpeech;
+/*(0x0394 (+168) 1,type=CAEWeaponAudioEntity) */   //  CAEWeaponAudioEntity		m_weaponAudio;
+/*(0x043c (+36) 1,type=char) */     //char field_43C[36];
+/*(0x0460 (+8) 1,type=char) */     //char field_460[8];
+/*(0x0468 (+4) 1,type=int) */     //int field_468;
+char PADDING[0x046c];
 /*(0x046c (+0) 1,type=struct) */     struct {
 /*(0x046c (+0.125) 0.125,type=int) */         unsigned int bIsStanding : 1; 
 /*(0x046c (+0.125) 0.125,type=int) */         unsigned int bWasStanding : 1; 
@@ -139,24 +139,24 @@ char PADDING[312]
 /*(0x047a (+0.125) 0.125,type=int) */         unsigned int bTestForShotInVehicle : 1;
 /*(0x047a (+0.125) 0.125,type=int) */         unsigned int bUsedForReplay : 1; 
 /*(0x047a (+0) 1,type=}) */     } m_nPedFlags;
-/*(0x047a (+2) 1,type=char) */ char padding[2];
+/*(0x047a (+2) 1,type=char) */ char padding0[2];
 /*(0x047c (+4) 1,type=CPedIntelligence) */     void   *m_pIntelligence;
-/*(0x0480 (+4) 1,type=CPlayerData) */     CPlayerData        *m_pPlayerData;
+/*(0x0480 (+4) 1,type=CPlayerData) */    /* CPlayerData*/ void        *m_pPlayerData;
 /*(0x0484 (+1) 1,type=char) */     unsigned char       m_nCreatedBy;
 /*(0x0485 (+3) 1,type=char) */     char                field_485[3];
 /*(0x0488 (+76) 1,type=AnimBlendFrameData) */     void *m_apBones[19];
 /*(0x04d4 (+4) 1,type=int) */     unsigned int        m_nAnimGroup;
 /*(0x04d8 (+8) 1,type=CVector2D) */     CVector2D           m_vecAnimMovingShiftLocal;
-/*(0x04e0 (+20) 1,type=CPedAcquaintance) */     CPedAcquaintance    m_acquaintance;
+/*(0x04e0 (+20) 1,type=CPedAcquaintance) */    /* CPedAcquaintance*/   char void_m_acquaintance[20];
 /*(0x04f4 (+4) 1,type=RwObject) */     void           *m_pWeaponObject;
 /*(0x04f8 (+4) 1,type=RwFrame) */     void            *m_pGunflashObject;
 /*(0x04fc (+4) 1,type=RwObject) */     void           *m_pGogglesObject;
-/*(0x0500 (+4) 1,type=char) */     unsigned void      *m_pGogglesState;
+/*(0x0500 (+4) 1,type=char) */     void      *m_pGogglesState;
 /*(0x0504 (+2) 1,type=short) */     short               m_nWeaponGunflashAlphaMP1;
 /*(0x0506 (+2) 1,type=short) */     short field_506;
 /*(0x0508 (+2) 1,type=short) */     short               m_nWeaponGunflashAlphaMP2;
 /*(0x050a (+2) 1,type=short) */     short field_50A;
-/*(0x050c (+32) 1,type=CPedIK) */     CPedIK              m_pedIK;
+/*(0x050c (+32) 1,type=CPedIK) */     /*CPedIK*/              char void_m_pedIK[32];
 /*(0x052c (+4) 1,type=int) */     int field_52C;
 /*(0x0530 (+4) 1,type=int) */     int           m_ePedState; 
 /*(0x0534 (+4) 1,type=int) */     int                 m_nMoveState;
@@ -181,14 +181,14 @@ char PADDING[312]
 /*(0x0594 (+4) 1,type=int) */     int field_594;
 /*(0x0598 (+4) 1,type=int) */     int                 m_nPedType;
 /*(0x059c (+4) 1,type=void) */     void               *m_pStats; 
-/*(0x05a0 (+364) 1,type=CWeapon) */     CWeapon             m_aWeapons[13];
+/*(0x05a0 (+364) 1,type=CWeapon) */     /*CWeapon*/    /*m_aWeapons[13]*/ char void_weapon[364];
 /*(0x070c (+4) 1,type=int) */     int         m_nSavedWeapon; 
 /*(0x0710 (+4) 1,type=int) */     int         m_nDelayedWeapon; 
 /*(0x0714 (+4) 1,type=int) */     unsigned int        m_nDelayedWeaponAmmo;
 /*(0x0718 (+1) 1,type=char) */     unsigned char       m_nActiveWeaponSlot;
 /*(0x0719 (+1) 1,type=char) */     unsigned char       m_nWeaponShootingRate;
 /*(0x071a (+1) 1,type=char) */     unsigned char       m_nWeaponAccuracy;
-/*(0x071b (+1) 1,type=char) */ char padding;
+/*(0x071b (+1) 1,type=char) */ char padding2;
 /*(0x071c (+4) 1,type=CObject) */     void            *m_pTargetedObject;
 /*(0x0720 (+4) 1,type=int) */     int field_720;
 /*(0x0724 (+4) 1,type=int) */     int field_724;

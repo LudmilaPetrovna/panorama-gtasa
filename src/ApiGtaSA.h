@@ -18,6 +18,7 @@ typedef struct _FxManager_c FxManager_c;
 typedef struct _CQuaternion CQuaternion;
 typedef struct _CPhysical CPhysical;
 #include "convCVector.h"
+#include "convCVector2D.h"
 #include "convCMatrix.h"
 #include "convCSimpleTransform.h"
 #include "convCPlaceable.h"
@@ -29,6 +30,7 @@ typedef struct _CPhysical CPhysical;
 #include "convCQuaternion.h"
 #include "convCPhysical.h"
 #include "convCObject.h"
+#include "convCPed.h"
 
 
 // my useful funcs

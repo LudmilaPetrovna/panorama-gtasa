@@ -1,15 +1,16 @@
-#include <windows.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <time.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <math.h>
+#include <windows.h>
 
 #include "ApiGtaSA.h"
 #include "Freeze.h"
 #include "SpawnObject.h"
 #include "hilbert.h"
+#include "Screenshot.h"
 
 // TODO: add more fun points of game, game is so beautiful!
 typedef struct{
@@ -842,10 +843,17 @@ MessageJumpQ("sea level changed", 1000, 0, false);
 
 if(GetAsyncKeyState(VK_F11)&1){
 
-*(char*)0x007453F0=0xc3;
-*(char*)0x0057C520=0xc3;
+/*
+CEntity *cent=(CEntity *)getPlayerCped();
+cent->m_nModelIndex=9;
+*/
 
-MessageJumpQ("no mouse patched!", 1000, 0, false);
+
+do_screenshot();
+
+sprintf(tmp,"screen captured!");
+
+MessageJumpQ(tmp, 1000, 0, false);
 
 continue;
 
