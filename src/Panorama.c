@@ -488,6 +488,7 @@ setGameFPSLimit(105);
 
 
 DWORD WINAPI MyASIThread(LPVOID lpParam){
+int q;
 
 while(1){
 
@@ -824,7 +825,6 @@ if(GetAsyncKeyState(VK_NUMPAD4)&1){
 CVector *pos=getPlayerVector();
 void *water=(void*)0xC22910;
 int water_vertex_size=20;
-int q;
 float newlevel=pos->z+1.0;
 for(q=0;q<1200;q++){
 *(float*)(water+q*water_vertex_size+4)=newlevel;
@@ -843,12 +843,6 @@ MessageJumpQ("sea level changed", 1000, 0, false);
 
 if(GetAsyncKeyState(VK_F11)&1){
 
-/*
-CEntity *cent=(CEntity *)getPlayerCped();
-cent->m_nModelIndex=9;
-*/
-
-
 do_screenshot();
 
 sprintf(tmp,"screen captured!");
@@ -857,14 +851,6 @@ MessageJumpQ(tmp, 1000, 0, false);
 
 continue;
 
-void *scene=(void*)0xC17038;
-void *rwcam=*(void**)(scene+4); // 0183ECCC   
-*(int*)(rwcam+0x14)=2; // projection type
-//*(int*)(rwcam+0x20)=2; // view matrix
-
-MessageJumpQ("parallel", 1000, 0, false);
-
-continue;
 
 
 /*
