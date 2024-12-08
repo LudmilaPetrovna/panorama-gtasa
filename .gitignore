@@ -1,5 +1,5 @@
 *.asi
 *.exe
 *.o
-src/kthook/*
-src/mingw-std-threads-master/*
+src/kthook/
+src/mingw-std-threads-master/
