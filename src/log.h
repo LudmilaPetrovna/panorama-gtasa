@@ -1,0 +1,1 @@
+void logme(char *msg);

@@ -10,16 +10,28 @@
 
 #include "Screenshot.h"
 
-void do_screenshot(){
+static int is_screenshot_active=0;
 
 int width=800,height=600;
 
 IDirect3DSurface9* pRenderTarget=NULL;
 IDirect3DSurface9* pDestTarget=NULL;
 
+
+void do_screenshot(){
+is_screenshot_active^=1;
+}
+
+void on_frame_screenshot(){
+
+if(!is_screenshot_active){return;}
+
+
 IDirect3DDevice9 *d3ddev = *(IDirect3DDevice9 **)0xC97C28;
 
+if(!pDestTarget){
 d3ddev->CreateOffscreenPlainSurface(width,height, D3DFMT_A8R8G8B8, D3DPOOL_SYSTEMMEM, &pDestTarget, NULL);
+}
 
 char filename[32];
 sprintf(filename,"screenshot-%d_.bmp",(int)time(0));
@@ -34,7 +46,7 @@ fflush(t);
 
 D3DXSaveSurfaceToFile(filename, D3DXIFF_BMP, pDestTarget, 0, NULL );
 fflush(t);
-   pDestTarget->Release();
+//   pDestTarget->Release();
 fclose(t);
 
 return;

@@ -1,10 +1,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-void do_screenshot();
-void on_frame_screenshot();
-
-
+void hooks_install();
 
 #ifdef __cplusplus
 }
