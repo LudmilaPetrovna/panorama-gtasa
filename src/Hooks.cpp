@@ -8,9 +8,9 @@
 #include <memory>
 #include <kthook/kthook.hpp>
 
+#include "log.h"
 #include "Screenshot.h"
 #include "Hooks.h"
-#include "log.h"
 
 using CTimer__UpdateSignature = void(__cdecl*)();
 using EndSceneSignature = HRESULT(__stdcall*)(IDirect3DDevice9*);

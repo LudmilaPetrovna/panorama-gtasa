@@ -1,0 +1,19 @@
+Пакетное создание скриншотов
+"Поместить персонажа в безопасность"
+
+no escape on window focus lost
+
+add filters
+add screen capture to png
+add screen capture to ffmpeg
+add screen capture from whole screen
+add screen capture from rendered cam
+
+Формат задания:
+char posx/posy/posz/heading-angle view
+camera posx/posy/posz/heading-angle view
+interrior
+weather id, old id, new id, interpolation
+water height
+time
+screenshot type: flat, sphere

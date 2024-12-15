@@ -1,14 +1,21 @@
 #include <stdio.h>
 #include <time.h>
 
+#include "log.h"
 
 
-void logme(char *msg){
+FILE *logme_init(){
 static FILE *f=NULL;
-if(!f){f=fopen("logs.txt","w");}
+static char filename[256];
 
-fprintf(f,"%d: %s\n",(int)time(0),msg);
-fflush(f);
-
+if(!f){
+sprintf(filename,"logs-%d.txt",(int)time(0));
+f=fopen(filename,"w");
 }
+
+return(f);
+}
+
+
+
 

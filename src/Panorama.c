@@ -11,6 +11,7 @@
 #include "SpawnObject.h"
 #include "hilbert.h"
 #include "Screenshot.h"
+#include "log.h"
 
 // TODO: add more fun points of game, game is so beautiful!
 typedef struct{
@@ -84,6 +85,8 @@ char *panoRoot="T:\\GTA-trains\\Pano";
 char panoName[1024];
 char path[1024];
 char tmp[256];
+
+
 
 
 
@@ -689,6 +692,13 @@ int weatherID=drand()*23.0;
 forceWeatherNow(weatherID);
 sprintf(tmp,"New weather ID: %d",weatherID);
 MessageJumpQ(tmp, 10000, 0, false);
+
+void *scene2=(void*)0xC17038;
+void *rwcam2=*(void**)(scene2+4);
+*(int*)(rwcam2+0x14)=1;
+
+
+
 }
 
 if(GetAsyncKeyState(VK_NUMPAD2)&1){
@@ -843,11 +853,73 @@ MessageJumpQ("sea level changed", 1000, 0, false);
 
 if(GetAsyncKeyState(VK_F11)&1){
 
-do_screenshot();
+//do_screenshot();
+work_at_background();
+void *scene1=(void*)0xC17038;
+void *rwcam1=*(void**)(scene1+4);
+*(int*)(rwcam1+0x14)=2;
 
-sprintf(tmp,"screen captured!");
+
+float zoom=drand()*10.0;
+*(float*)(rwcam1+0x70)=zoom;
+*(float*)(rwcam1+0x74)=zoom;
+
+
+logme("cam patched at %p\n",rwcam1+0x14);
+logme("from vector: %p\n",&theCamera->m_vecFixedModeSource.x);
+logme("recip %p\n",rwcam1+0x70);
+
+
+sprintf(tmp,"screen captured! %f",zoom);
 
 MessageJumpQ(tmp, 1000, 0, false);
+
+float *projmat=(float*)0x8E2458;
+float *viewmat=(float*)0xC9BC80;
+float *viewprojmat=(float*)0xC94C30;
+
+int qq;
+for(qq=0;qq<16;qq++){
+viewprojmat[qq]=drand()*10.0;
+}
+
+viewprojmat[0]=zoom;
+viewprojmat[5]=zoom;
+viewprojmat[10]=zoom;
+
+
+continue;
+
+
+*(uint8_t*)0x713950=0xc3; // disable clouds
+*(uint8_t*)0x716380=0xc3; // disable volumetric clouds
+*(uint8_t*)0x716C90=0xc3; // disable moving fog
+*(uint8_t*)0x7154B0=0xc3; // disable bottom from height
+
+
+flyTo(2318,-981,64,0,0,0);
+float hh,hhh;
+
+CPlaceable *place=(CPlaceable *)theCamera;
+
+for(hh=0;hh<40;hh+=.1){
+hhh=pow(hh,2);
+setCameraFromToFov(2318,-981,hhh,2318,-981,64,5.0);
+place->m_placement.m_vPosn.x=2318;
+place->m_placement.m_vPosn.y=-981;
+place->m_placement.m_vPosn.z=70;
+if(place->m_matrix){
+place->m_matrix->pos.x=place->m_placement.m_vPosn.x;
+place->m_matrix->pos.y=place->m_placement.m_vPosn.y;
+place->m_matrix->pos.z=place->m_placement.m_vPosn.z;
+}
+
+
+Sleep(100);
+}
+
+
+
 
 continue;
 
