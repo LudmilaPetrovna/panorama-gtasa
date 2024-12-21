@@ -13,6 +13,7 @@ DWORD dwTID;
 srand(time(0));
 
 if(fdwReason==DLL_PROCESS_ATTACH){
+work_at_background();
 hooks_install();
 CreateThread(NULL,0,MyASIThread,NULL,0,&dwTID);
 }

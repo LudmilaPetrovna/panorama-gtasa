@@ -53,7 +53,7 @@ int *darkness=(int*)(0x8d5204);
 char *darknessEnable=(char*)(0xc402c4);
 
 char *CTheScripts__bDisplayHud=(char*)0xA444A0;
-char *CHud__bScriptDontDisplayRadar=(char*)0xBAA3FB;;
+char *CHud__bScriptDontDisplayRadar=(char*)0xBAA3FB;
 float *CHud__textBoxNumLines=(float*)0xBAA460;
 int *CHud__helpMessageState=(int*)0xBAA474;
 
@@ -129,7 +129,7 @@ Patch them all!!!
 *(float*)(0x862CE4)=aspect;
 *(float*)(0x8595F0)=aspect;
 *(float*)(0x85F09C)=aspect;
-MessageJumpQ("Aspect patched", 1000, 0, false);
+//MessageJumpQ("Aspect patched", 1000, 0, false);
 }
 
 void setGameFPSLimit(int fps){
@@ -195,7 +195,7 @@ void rollTime(){
 *clockMinutes=drand_num(60.0);
 *clockSeconds=drand_num(60.0);
 sprintf(screenMessage,"Time: %02d:%02d:%02d",*clockHours,*clockMinutes,*clockSeconds);
-MessageJumpQ(screenMessage, 10000, 0, false);
+//MessageJumpQ(screenMessage, 10000, 0, false);
 }
 
 void flyTo(float tx, float ty, float tz, float heading, int interior, int need_detect_land){

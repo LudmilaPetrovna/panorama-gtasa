@@ -1,0 +1,61 @@
+<style>
+body{overflow:hidden;background:cyan;}
+img{position:absolute;top:0;left:0}
+div{position:absolute;left:10;top:10;border:1px solid black;background:rgba(255,255,255,.8);padding:10px;border-radius:10px;}
+</style>
+
+<body><img src=xor.png id=pic>
+<div id=trace></div>
+<div id=control style=top:100px>
+<input type=range value=0 min=-8 max=8 step=0.001 id=axis_x onchange=update_axis() oninput=update_axis()><br>
+<input type=range value=0 min=-8 max=8 step=0.001 id=axis_y onchange=update_axis() oninput=update_axis()>
+</div>
+
+<script>
+var pic=document.getElementById("pic");
+var s=pic.style;
+
+var win_w=document.body.offsetWidth+16;
+var win_h=document.body.offsetHeight+16;
+var win_a=win_w/win_h;
+
+var scale=4;
+var frame=0;
+
+function pos(xx,yy){
+var size=win_h*scale;
+var deb="position:\n"+xx+"x"+yy+"\n";
+s.width=s.height=size;
+xx=xx/2+.5;
+yy=yy/2+.5;
+var px=xx*win_w-size/2;
+var py=yy*win_h-size/2;
+s.left=px;
+s.top=py
+document.getElementById("trace").innerText=deb+px+"x"+py;
+}
+
+function update_axis(){
+pos(
+document.getElementById("axis_x").value,
+document.getElementById("axis_y").value
+);
+}
+
+
+function update(){
+var time_scale=5;
+var state=Math.floor(frame/time_scale);
+var tile_x=state&3;
+var tile_y=(state>>2)&3;
+var v_step=scale;
+
+pos((scale-1-tile_x*2)/win_a,scale-1-tile_y*2);
+frame++;
+
+}
+
+pos(0,0);
+setInterval(update,100);
+
+</script>

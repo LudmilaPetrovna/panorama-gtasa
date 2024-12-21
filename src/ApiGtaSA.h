@@ -2,6 +2,9 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #ifndef API_GTA_SAN_ANDREAS
 #define API_GTA_SAN_ANDREAS
@@ -31,6 +34,8 @@ typedef struct _CPhysical CPhysical;
 #include "convCPhysical.h"
 #include "convCObject.h"
 #include "convCPed.h"
+
+#include "RwCamDummy.h"
 
 
 // my useful funcs
@@ -115,7 +120,8 @@ extern void __cdecl CPickups__RemovePickUp(uint16_t handle);
 extern void __cdecl CGameLogic__RestorePlayerStuffDuringResurrection(void *player, float x, float y, float z, float angle);
 extern void __cdecl CStreaming__RemoveBuildingsNotInArea(int AreaCode);
 
-extern void __thiscall CPlaceable__SetHeading(CPlaceable *this, float angle);
+extern void* __thiscall CPlaceable__setPosition(CPlaceable *this_, CVector *pos);
+extern void __thiscall CPlaceable__SetHeading(CPlaceable *this_, float angle);
 extern float __thiscall CPlaceable__GetHeading();
 extern double __cdecl FindPlayerHeading(int playerId);
 
@@ -143,7 +149,6 @@ extern void __cdecl CTimer__Suspend();
 extern void* __cdecl CObject__Create(int modelId);
 extern void __cdecl CWorld__Add(CEntity *entity);
 extern CObject* __stdcall CPool_CObject___AtHandle(int handle);
-extern void* __thiscall CPlaceable__setPosition(CPlaceable *this, CVector *pos);
 
 volatile extern int *CTimer_m_FrameCounter;
 volatile extern float *CTimer_game_FPS;
@@ -198,3 +203,8 @@ extern float *GAME_GRAVITY;
 
 
 #endif
+
+#ifdef __cplusplus
+}
+#endif
+

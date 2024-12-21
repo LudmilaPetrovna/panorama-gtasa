@@ -1,7 +1,7 @@
 Пакетное создание скриншотов
 "Поместить персонажа в безопасность"
 
-no escape on window focus lost
++no escape on window focus lost
 
 add filters
 add screen capture to png

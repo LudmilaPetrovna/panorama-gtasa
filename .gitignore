@@ -3,3 +3,8 @@
 *.o
 src/kthook/
 src/mingw-std-threads-master/
+*.mp3
+*.mp4
+*.zip
+*.bmp
+

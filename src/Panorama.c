@@ -490,13 +490,87 @@ setGameFPSLimit(105);
 
 
 
+void satellite_view(){
+
+unsigned int tile_x,tile_y,tile_id;
+unsigned int level=7;
+int oldval;
+int world_size=powl(2,level);
+
+double wantFov=90.0;
+double aspect=((double)*LastScreenWidth)/(*LastScreenHeight);
+double satellite_cam_height=tan((90.0-wantFov/2.0)*M_PI/180.0)*6000.0/2.0*aspect;
+
+// remove UI
+*CTheScripts__bDisplayHud=0;
+*CHud__bScriptDontDisplayRadar=1;
+
+// remove clouds
+*(uint8_t*)0x713950=0xc3; // disable clouds
+*(uint8_t*)0x716380=0xc3; // disable volumetric clouds
+*(uint8_t*)0x716C90=0xc3; // disable moving fog
+*(uint8_t*)0x7154B0=0xc3; // disable bottom from height
+memset((void*)0x53E121,0x90,5);
+
+// don't scale image to full window
+//memset((void*)0x7EE432,90,15);
+//*(uint8_t*)0x7EE410=0xc3;
+*(uint8_t*)0x7EE432=0x90;
+*(uint8_t*)0x7EE433=0x90;
+*(uint8_t*)0x7EE434=0x90;
+*(uint8_t*)0x7EE43E=0x90;
+*(uint8_t*)0x7EE43F=0x90;
+*(uint8_t*)0x7EE440=0x90;
+
+setAspectRatio(aspect);
+setCameraFromToFov(0,-1,satellite_cam_height,0,0,0,wantFov);
+Sleep(5000);
+
+RwCamDummy *scenecam=(RwCamDummy*)*(void**)(0xC17038+4);
+
+double scale=pow(2.0,level);
+int tiles_count=hilbert_points_at_level(level);
+
+double scale_x=scale/scenecam->view_window_x;
+double scale_y=scale/scenecam->view_window_y;
+
+scenecam->recip_view_window_x=scale_x;
+scenecam->recip_view_window_y=scale_y;
+
+screenshoter.taken=0;
+screenshoter.delay=-1;
+screenshoter.active=1;
+
+//prepareFreeze();
+
+for(tile_id=0;tile_id<tiles_count && !*menuActive;tile_id++){
+setGameFPSLimit(105);
+//refreshFreeze();
+hilbert(tile_id,level,&tile_x,&tile_y);
+scenecam->view_offset_x=(scale-1.0-tile_x*2.0)/aspect/scale_x;
+scenecam->view_offset_y=(scale-1.0-(world_size-1.0-tile_y)*2.0)/scale_y;
+
+sprintf(screenshoter.filename,"tile-%dx%d.jpg",tile_x,tile_y);
+oldval=screenshoter.taken;
+screenshoter.delay=70;
+while(screenshoter.taken==oldval){ // wait to take screenshot
+Sleep(100);
+}
+
+}
+//restoreFreeze();
+}
+
+
+
 DWORD WINAPI MyASIThread(LPVOID lpParam){
 int q;
 
+HWND activeWindow;
 while(1){
 
-
-if(*userPause || *codePause || *menuActive || *CTimer_m_FrameCounter<50){ // game not active
+activeWindow=GetForegroundWindow();
+if(*userPause || *codePause || *menuActive || *CTimer_m_FrameCounter<50 || activeWindow!=*(void**)0xC97C1C){ // game not active
 
 //getPlayerCped()
 Sleep(100);
@@ -690,14 +764,8 @@ flyTo(drand()*5000.0-2500.0,drand()*5000.0-2500.0,1000.0,drand()*360.0,0,1);
 if(GetAsyncKeyState(VK_F10)&1){
 int weatherID=drand()*23.0;
 forceWeatherNow(weatherID);
-sprintf(tmp,"New weather ID: %d",weatherID);
-MessageJumpQ(tmp, 10000, 0, false);
-
-void *scene2=(void*)0xC17038;
-void *rwcam2=*(void**)(scene2+4);
-*(int*)(rwcam2+0x14)=1;
-
-
+//sprintf(tmp,"New weather ID: %d",weatherID);
+//MessageJumpQ(tmp, 10000, 0, false);
 
 }
 
@@ -853,118 +921,8 @@ MessageJumpQ("sea level changed", 1000, 0, false);
 
 if(GetAsyncKeyState(VK_F11)&1){
 
+satellite_view();
 //do_screenshot();
-work_at_background();
-void *scene1=(void*)0xC17038;
-void *rwcam1=*(void**)(scene1+4);
-*(int*)(rwcam1+0x14)=2;
-
-
-float zoom=drand()*10.0;
-*(float*)(rwcam1+0x70)=zoom;
-*(float*)(rwcam1+0x74)=zoom;
-
-
-logme("cam patched at %p\n",rwcam1+0x14);
-logme("from vector: %p\n",&theCamera->m_vecFixedModeSource.x);
-logme("recip %p\n",rwcam1+0x70);
-
-
-sprintf(tmp,"screen captured! %f",zoom);
-
-MessageJumpQ(tmp, 1000, 0, false);
-
-float *projmat=(float*)0x8E2458;
-float *viewmat=(float*)0xC9BC80;
-float *viewprojmat=(float*)0xC94C30;
-
-int qq;
-for(qq=0;qq<16;qq++){
-viewprojmat[qq]=drand()*10.0;
-}
-
-viewprojmat[0]=zoom;
-viewprojmat[5]=zoom;
-viewprojmat[10]=zoom;
-
-
-continue;
-
-
-*(uint8_t*)0x713950=0xc3; // disable clouds
-*(uint8_t*)0x716380=0xc3; // disable volumetric clouds
-*(uint8_t*)0x716C90=0xc3; // disable moving fog
-*(uint8_t*)0x7154B0=0xc3; // disable bottom from height
-
-
-flyTo(2318,-981,64,0,0,0);
-float hh,hhh;
-
-CPlaceable *place=(CPlaceable *)theCamera;
-
-for(hh=0;hh<40;hh+=.1){
-hhh=pow(hh,2);
-setCameraFromToFov(2318,-981,hhh,2318,-981,64,5.0);
-place->m_placement.m_vPosn.x=2318;
-place->m_placement.m_vPosn.y=-981;
-place->m_placement.m_vPosn.z=70;
-if(place->m_matrix){
-place->m_matrix->pos.x=place->m_placement.m_vPosn.x;
-place->m_matrix->pos.y=place->m_placement.m_vPosn.y;
-place->m_matrix->pos.z=place->m_placement.m_vPosn.z;
-}
-
-
-Sleep(100);
-}
-
-
-
-
-continue;
-
-
-
-/*
-*sunCoreBlue=drand()*255.0;
-*sunCoreGreen=drand()*255.0;
-*sunCoreRed=drand()*255.0;*/
-
-//MessageJumpQ(tmp, 1000, 0, false);
-
-CVector *player_pos=getPlayerVector();
-
-CVector newpos;
-newpos.x=player_pos->x+drand()*200.0-100.0;
-newpos.y=player_pos->y+drand()*200.0-100.0;
-newpos.z=-200;
-newpos.z=CWorld__FindGroundZForCoord(newpos.x,newpos.y);
-
-// Вроде бы как тут должна прогрузиться коллизия, но это не точно.
-// Вроде как оно и не работает
-//requestCollision(&newpos,0);
-//CWorld__TestSphereAgainstWorld(newpos,1.0,0,1,1,1,1,1,0);
-//CStreaming__StreamZoneModels(&newpos);
-//memcpy(player_pos,&newpos,sizeof(CVector));
-/*
-int tryout=20;
-while(tryout--){
-Sleep(100);
-
-// Получаем высоту точки. На далеких позициях всегда выдает 20.0
-// т.е. по каким-то причинам карта еще не загрузилась.
-newpos.z=CWorld__FindGroundZForCoord(newpos.x,newpos.y);
-if(newpos.z!=20.0){break;}
-}
-player_pos->z=newpos.z;
-*/
-// Вывод на экран
-sprintf(tmp,"try pos: %.3fx%.3fx%.3f",newpos.x,newpos.y,newpos.z);
-MessageJumpQ(tmp, 1000, 0, false);
-
-
-void *cped=getPlayerCped();
-*(float*)(cped+0x540)=99999.99; // health
 
 continue;
 

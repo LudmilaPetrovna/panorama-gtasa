@@ -4,12 +4,19 @@
 
 
 void work_at_background(){
-// no move mouse
+// no move mouse / SetCursorPos
 *(char*)0x007453F0=0xc3;
 *(char*)0x0057C520=0xc3;
 
+// no change cursor visibility / ShowCursor
+*(char*)0x7453E0=0xc3;
+*(char*)(0x747FE9+1)=1;
+*(char*)(0x7481CD+1)=1;
+
 // is foreground
 *(char*)0x8D621C=1;
+*(int*)(0x747FB0+6)=1;
+*(int*)(0x748054+6)=1;
 }
 
 void apply_game_filters(FILTERS_PARAMS *p){

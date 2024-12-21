@@ -15,6 +15,7 @@ char cctv;
 char rain;
 char smokey;
 char underwater;
+//_CWeather_TrafficLightsBrightness
 }FILTERS_PARAMS;
 
 
