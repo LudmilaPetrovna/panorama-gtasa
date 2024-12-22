@@ -493,11 +493,11 @@ setGameFPSLimit(105);
 void satellite_view(){
 
 unsigned int tile_x,tile_y,tile_id;
-unsigned int level=7;
+unsigned int level=5;
 int oldval;
 int world_size=powl(2,level);
 
-double wantFov=90.0;
+double wantFov=1.0;
 double aspect=((double)*LastScreenWidth)/(*LastScreenHeight);
 double satellite_cam_height=tan((90.0-wantFov/2.0)*M_PI/180.0)*6000.0/2.0*aspect;
 
@@ -522,8 +522,13 @@ memset((void*)0x53E121,0x90,5);
 *(uint8_t*)0x7EE43F=0x90;
 *(uint8_t*)0x7EE440=0x90;
 
+// find player position vector;
+CVector *cj_pos=getPlayerVector();
+
+// update aspect ratio for wide-screen monitors (if need)
 setAspectRatio(aspect);
-setCameraFromToFov(0,-1,satellite_cam_height,0,0,0,wantFov);
+setCameraFromToFov(0,-0.1,satellite_cam_height,0,0,0,wantFov);
+
 Sleep(5000);
 
 RwCamDummy *scenecam=(RwCamDummy*)*(void**)(0xC17038+4);
@@ -534,6 +539,8 @@ int tiles_count=hilbert_points_at_level(level);
 double scale_x=scale/scenecam->view_window_x;
 double scale_y=scale/scenecam->view_window_y;
 
+double tile_size=6000.0/(double)world_size;
+
 scenecam->recip_view_window_x=scale_x;
 scenecam->recip_view_window_y=scale_y;
 
@@ -541,24 +548,49 @@ screenshoter.taken=0;
 screenshoter.delay=-1;
 screenshoter.active=1;
 
-//prepareFreeze();
+prepareFreeze();
+setGravity(0);
 
 for(tile_id=0;tile_id<tiles_count && !*menuActive;tile_id++){
-setGameFPSLimit(105);
-//refreshFreeze();
 hilbert(tile_id,level,&tile_x,&tile_y);
+sprintf(screenshoter.filename,"tile-%dx%d.jpg",tile_x,tile_y);
+if(GetFileAttributes(screenshoter.filename)!=INVALID_FILE_ATTRIBUTES){continue;}
+
+double pos_x=tile_size*tile_x-3000.0+tile_size/2.0;
+double pos_y=tile_size*tile_y-3000.0+tile_size/2.0;
+double pos_z=findGroundZForCoordByFile(pos_x,pos_y)+1.0;
+if(pos_z<0){pos_z=0;}
+
+cj_pos->x=pos_x;
+cj_pos->y=pos_y;
+cj_pos->z=pos_z;
+
+theCamera->m_fNearClipScript=satellite_cam_height-pos_z-500.0;
+theCamera->m_bUseNearClipScript=1;
+
+// look to sky
+setCameraFromToFov(0,0,30,0,0,31,90);waitNFrames(2);
+
+// look to land
+setGameFPSLimit(105);
+refreshFreeze();
+
+setCameraFromToFov(0,-0.1,satellite_cam_height,0,0,0,wantFov);
 scenecam->view_offset_x=(scale-1.0-tile_x*2.0)/aspect/scale_x;
 scenecam->view_offset_y=(scale-1.0-(world_size-1.0-tile_y)*2.0)/scale_y;
 
-sprintf(screenshoter.filename,"tile-%dx%d.jpg",tile_x,tile_y);
-oldval=screenshoter.taken;
-screenshoter.delay=70;
-while(screenshoter.taken==oldval){ // wait to take screenshot
+//logme("Height in sky: %d, pos: %fx%fx%f, clip %f\n",(int)satellite_cam_height,pos_x,pos_y,pos_z,theCamera->m_fNearClipScript);
+
 Sleep(100);
+
+oldval=screenshoter.taken;
+screenshoter.delay=7;
+while(screenshoter.taken==oldval){ // wait to take screenshot
+Sleep(10);
 }
 
 }
-//restoreFreeze();
+restoreFreeze();
 }
 
 
@@ -607,6 +639,7 @@ if(is_pause){
 
 }
 
+/*
 if(GetAsyncKeyState(VK_F5)&1){
 flyTo(181.1962, 1266.635, 22.0121, 346.0,0,0);
 forceWeatherNow(19);
@@ -621,9 +654,10 @@ pos.z=22.0121;
 playSoundId(1083,&pos);
 
 }
+*/
 
 if(GetAsyncKeyState(VK_NUMPAD1)&1){
-//cityScanner();
+satellite_view();
 }
 
 if(GetAsyncKeyState(VK_NUMPAD5)&1){
@@ -748,26 +782,30 @@ rollTime();
 }
 
 if(GetAsyncKeyState(VK_F7)&1){
-//createPano();
+int weatherID=drand()*23.0;
+forceWeatherNow(weatherID);
+sprintf(tmp,"New weather ID: %d",weatherID);
+MessageJumpQ(tmp, 10000, 0, false);
 }
 
 if(GetAsyncKeyState(VK_F8)&1){
+CVector *cj_pos=getPlayerVector();
+do{
+cj_pos->x=drand()*6000.0-3000.0;
+cj_pos->y=drand()*6000.0-3000.0;
+cj_pos->z=findGroundZForCoordByFile(cj_pos->x,cj_pos->y)+1.0;
+} while(cj_pos->z<0.0);
+continue;
+
 flyTo(places[places_current].x,places[places_current].y,places[places_current].z,places[places_current].heading,places[places_current].interior,0);
 places_current++;
 places_current%=places_count;
-}
 
-if(GetAsyncKeyState(VK_F9)&1){
-flyTo(drand()*5000.0-2500.0,drand()*5000.0-2500.0,1000.0,drand()*360.0,0,1);
-}
 
-if(GetAsyncKeyState(VK_F10)&1){
-int weatherID=drand()*23.0;
-forceWeatherNow(weatherID);
-//sprintf(tmp,"New weather ID: %d",weatherID);
-//MessageJumpQ(tmp, 10000, 0, false);
+//flyTo(drand()*5000.0-2500.0,drand()*5000.0-2500.0,1000.0,drand()*360.0,0,1);
 
 }
+
 
 if(GetAsyncKeyState(VK_NUMPAD2)&1){
 flyTo(-944.0,2224.0,40.6,90,0,0);
@@ -839,315 +877,130 @@ MessageJumpQ(msg, 1000, 0, false);
 
 continue;
 
-// add green color to skybox
-static uint8_t green_color_to_skybox1[]={0xB9, 0x00, 0xFF, 0x00, 0xFF, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90};
-static uint8_t green_color_to_skybox2[]={0xB9, 0x00, 0xFF, 0x00, 0xFF, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90};
-
-memcpy((void*)0x713060,green_color_to_skybox1,sizeof(green_color_to_skybox1));
-memcpy((void*)0x7130FF,green_color_to_skybox2,sizeof(green_color_to_skybox2));
-
-// remove clouds from bottom
-memset((void*)0x53E121,0x90,5);
-
-continue;
-
-// sky top/bottom
-//0xB7AAA0,0xB7A4E0,0xB7A7C0,,0xB7C1A0,0xB7C3C8,0xB7AB58,0xB7AEF0,0xB7B900,0xB7BB28
-//0xB7A9E8,0xB7A428,0xB7A708,,0xB7C0E8,0xB7C310 0xB7AC10,0xB7AE38,0xB7B848,0xB7BA70,
-//0xB7A930,0xB7A370,0xB7A650,,0xB7C030,0xB7C258,0xB7ACC8,0xB7AD80,0xB7B790,0xB7B9B8
-//uint8_t* redpools[]=  {0xB7BD50,0xB7BF78};
-//uint8_t* greenpools[]={0xB7BC98,0xB7BEC0};
-//uint8_t* bluepools[]= {0xB7BBE0,0xB7BE08};
-
-uint8_t* redpools[]=  {(void*)0xB7BF78};
-uint8_t* greenpools[]={(void*)0xB7BEC0};
-uint8_t* bluepools[]= {(void*)0xB7BE08};
-
-#define TIMECYC_POOL_LEN 184
-
-int q,w;
-int pools_count=sizeof(redpools)/sizeof(redpools[0]);
-for(w=0;w<pools_count;w++){
-for(q=0;q<TIMECYC_POOL_LEN;q++){
-redpools[w][q]=0;
-greenpools[w][q]=255;
-bluepools[w][q]=0;
-}
-}
-
-MessageJumpQ("green sky", 1000, 0, false);
-
-continue;
-
-// remove intro tutorials
-// restarts count
-*(char*)0xA4326C=1;
-*(char*)0xA43268=1;
-
-// possible help_wasted_shown
-*(uint32_t*)0xA49b3c=1;
-
-// help_busted
-*(uint32_t*)0xA49b58=1;
-
-// remove hospital_pickup1-2
-CPickups__RemovePickUp(*(uint32_t*)0xA4d534);
-CPickups__RemovePickUp(*(uint32_t*)0xA4d538);
-CPickups__RemovePickUp(*(uint32_t*)0xA4d53c);
-
-MessageJumpQ("police/hospital restars patched", 1000, 0, false);
 }
 
 
-if(GetAsyncKeyState(VK_NUMPAD4)&1){
-CVector *pos=getPlayerVector();
-void *water=(void*)0xC22910;
-int water_vertex_size=20;
-float newlevel=pos->z+1.0;
-for(q=0;q<1200;q++){
-*(float*)(water+q*water_vertex_size+4)=newlevel;
-}
-/*
-      <Description>"WAVENESS_DEFAULT"</Description>
-      <Address>72C659+6</Address>
 
-      <Description>"CWeather_Wavyness"</Description>
-      <Address>C812E8</Address>
-*/
-MessageJumpQ("sea level changed", 1000, 0, false);
+if(GetAsyncKeyState(VK_F9)&1){
+static int type_projection=0;
+type_projection^=1;
+setCameraProjection(type_projection+1);
 }
 
+if(GetAsyncKeyState(VK_F10)&1){
 
+int qq,ww,ff;
+
+RwCamDummy *scenecam=(RwCamDummy*)*(void**)(0xC17038+4);
+
+screenshoter.taken=0;
+screenshoter.delay=-1;
+screenshoter.active=1;
+prepareFreeze();
+
+
+*(uint8_t*)0x7EE432=0x90;
+*(uint8_t*)0x7EE433=0x90;
+*(uint8_t*)0x7EE434=0x90;
+*(uint8_t*)0x7EE43E=0x90;
+*(uint8_t*)0x7EE43F=0x90;
+*(uint8_t*)0x7EE440=0x90;
+
+
+for(ff=1;ff<100;ff++){
+
+for(ww=0;ww<=50;ww+=10){
+for(qq=0;qq<1;qq++){
+theCamera->m_nTypeOfSwitch=2;
+theCamera->m_bStartInterScript=1;
+theCamera->m_bLookingAtVector=1;
+theCamera->m_nModeToGoTo=15;
+theCamera->m_bLookingAtPlayer=0;
+theCamera->m_nWhoIsInControlOfTheCamera=1;
+theCamera->m_bGarageFixedCamPositionSet=0;
+theCamera->m_bBlockZoom=1;
+theCamera->m_vecFixedModeVector.x=qq;
+theCamera->m_vecFixedModeVector.y=ww;
+theCamera->m_vecFixedModeVector.z=0;
+theCamera->m_vecFixedModeSource.x=qq;
+theCamera->m_vecFixedModeSource.y=(double)ww+.0001;
+theCamera->m_vecFixedModeSource.z=50;
+theCamera->m_fFOVNew=90.0;
+setGameFPSLimit(105);
+refreshFreeze();
+
+
+double scale_x=scenecam->view_window_x/(double)ff;
+double scale_y=scenecam->view_window_y/(double)ff;
+
+scenecam->recip_view_window_x=scale_x;
+scenecam->recip_view_window_y=scale_y;
+
+
+sprintf(screenshoter.filename,"ortho-scale%d-%dx%d.jpg",ff,qq,ww);
+Sleep(100);
+
+int oldval=screenshoter.taken;
+screenshoter.delay=7;
+while(screenshoter.taken==oldval){ // wait to take screenshot
+Sleep(10);
+}
+
+}
+}
+}
+
+}
 
 if(GetAsyncKeyState(VK_F11)&1){
-
-satellite_view();
-//do_screenshot();
-
-continue;
-
-
-char *sunBlockedByClouds=(char *)0xC3E030;
-int *sunChangeBrightnessImmediately=(int*)0xC3E034;
-unsigned int *sunNumCoronas=(unsigned int*)0xC3E038;
-float *sunLightsMult=(float*)0x8D4B5C;
-unsigned int *sunMoonSize=(unsigned int *)0x8D4B60;
-
-*sunBlockedByClouds=0;
-*sunChangeBrightnessImmediately=1;
-//*sunNumCoronas=drand()*64.0;
-*sunLightsMult=drand()*20.0;
-sprintf(tmp,"changed, moon:%d, h1:%.3f,h2:%.3f",*sunMoonSize,1.0,2.0);
-//MessageJumpQ(tmp, 1000, 0, false);
-
-float *CTimeCycle_m_BrightnessAddedToAmbientBlue_=(float*)0xB79E30;
-float *CTimeCycle_m_BrightnessAddedToAmbientGreen_=(float*)0xB79E34;
-float *CTimeCycle_m_BrightnessAddedToAmbientRed_=(float*)0xB79E38;
-int *CTimeCycle_m_ExtraColourInter_=(int*)0xB79E3C;
-int *CTimeCycle_m_ExtraColourWeatherType_=(int*)0xB79E40;
-int *CTimeCycle_m_ExtraColour_=(int*)0xB79E44;
-int *CTimeCycle_m_FogReduction_=(int*)0xB79E48;
-float *CTimeCycle_m_fShadowDisplacementY_=(float*)0xB79E50;
-float *CTimeCycle_m_fShadowDisplacementX_=(float*)0xB79E90;
-float *CTimeCycle_m_fShadowSideY_=(float*)0xB79ED0;
-float *CTimeCycle_m_fShadowSideX_=(float*)0xB79F10;
-float *CTimeCycle_m_fShadowFrontY_=(float*)0xB79F50;
-float *CTimeCycle_m_fShadowFrontX_=(float*)0xB79F90;
-int *CTimeCycle_m_CurrentStoredValue_=(int*)0xB79FD0;
-unsigned char *CTimeCycle_m_nDirectionalMult_=(unsigned char*)0xB79FD8;
-unsigned char *CTimeCycle_m_nWaterFogAlpha_=(unsigned char*)0xB7A090;
-unsigned char *CTimeCycle_m_nHighLightMinIntensity_=(unsigned char*)0xB7A148;
-unsigned char *CTimeCycle_m_fCloudAlpha_=(unsigned char*)0xB7A200;
-unsigned char *CTimeCycle_m_fPostFx2Alpha_=(unsigned char*)0xB7A2B8;
-unsigned char *CTimeCycle_m_fPostFx2Blue_=(unsigned char*)0xB7A370;
-unsigned char *CTimeCycle_m_fPostFx2Green_=(unsigned char*)0xB7A428;
-unsigned char *CTimeCycle_m_fPostFx2Red_=(unsigned char*)0xB7A4E0;
-unsigned char *CTimeCycle_m_fPostFx1Alpha_=(unsigned char*)0xB7A598;
-unsigned char *CTimeCycle_m_fPostFx1Blue_=(unsigned char*)0xB7A650;
-unsigned char *CTimeCycle_m_fPostFx1Green_=(unsigned char*)0xB7A708;
-unsigned char *CTimeCycle_m_fPostFx1Red_=(unsigned char*)0xB7A7C0;
-unsigned char *CTimeCycle_m_fWaterAlpha_=(unsigned char*)0xB7A878;
-unsigned char *CTimeCycle_m_fWaterBlue_=(unsigned char*)0xB7A930;
-unsigned char *CTimeCycle_m_fWaterGreen_=(unsigned char*)0xB7A9E8;
-unsigned char *CTimeCycle_m_fWaterRed_=(unsigned char*)0xB7AAA0;
-unsigned char *CTimeCycle_m_nFluffyCloudsBottomBlue_=(unsigned char*)0xB7AB58;
-unsigned char *CTimeCycle_m_nFluffyCloudsBottomGreen_=(unsigned char*)0xB7AC10;
-unsigned char *CTimeCycle_m_nFluffyCloudsBottomRed_=(unsigned char*)0xB7ACC8;
-unsigned char *CTimeCycle_m_nLowCloudsBlue_=(unsigned char*)0xB7AD80;
-unsigned char *CTimeCycle_m_nLowCloudsGreen_=(unsigned char*)0xB7AE38;
-unsigned char *CTimeCycle_m_nLowCloudsRed_=(unsigned char*)0xB7AEF0;
-unsigned char *CTimeCycle_m_fLightsOnGroundBrightness_=(unsigned char*)0xB7AFA8;
-unsigned char *CTimeCycle_m_nPoleShadowStrength_=(unsigned char*)0xB7B340;
-unsigned char *CTimeCycle_m_nLightShadowStrength_=(unsigned char*)0xB7B3F8;
-unsigned char *CTimeCycle_m_nShadowStrength_=(unsigned char*)0xB7B4B0;
-char *CTimeCycle_m_fSpriteBrightness_=(char*)0xB7B568;
-char *CTimeCycle_m_fSpriteSize_=(char*)0xB7B620;
-char *CTimeCycle_m_fSunSize_=(char*)0xB7B6D8;
-unsigned char *CTimeCycle_m_nSunCoronaBlue_=(unsigned char*)0xB7B790;
-unsigned char *CTimeCycle_m_nSunCoronaGreen_=(unsigned char*)0xB7B848;
-unsigned char *CTimeCycle_m_nSunCoronaRed_=(unsigned char*)0xB7B900;
-unsigned char *CTimeCycle_m_nSunCoreBlue_=(unsigned char*)0xB7B9B8;
-unsigned char *CTimeCycle_m_nSunCoreGreen_=(unsigned char*)0xB7BA70;
-unsigned char *CTimeCycle_m_nSunCoreRed_=(unsigned char*)0xB7BB28;
-unsigned char *CTimeCycle_m_nSkyBottomBlue_=(unsigned char*)0xB7BBE0;
-unsigned char *CTimeCycle_m_nSkyBottomGreen_=(unsigned char*)0xB7BC98;
-unsigned char *CTimeCycle_m_nSkyBottomRed_=(unsigned char*)0xB7BD50;
-unsigned char *CTimeCycle_m_nSkyTopBlue_=(unsigned char*)0xB7BE08;
-unsigned char *CTimeCycle_m_nSkyTopGreen_=(unsigned char*)0xB7BEC0;
-unsigned char *CTimeCycle_m_nSkyTopRed_=(unsigned char*)0xB7BF78;
-unsigned char *CTimeCycle_m_nAmbientBlue_Obj_=(unsigned char*)0xB7C030;
-unsigned char *CTimeCycle_m_nAmbientGreen_Obj_=(unsigned char*)0xB7C0E8;
-unsigned char *CTimeCycle_m_nAmbientRed_Obj_=(unsigned char*)0xB7C1A0;
-unsigned char *CTimeCycle_m_nAmbientBlue_=(unsigned char*)0xB7C258;
-unsigned char *CTimeCycle_m_nAmbientGreen_=(unsigned char*)0xB7C310;
-unsigned char *CTimeCycle_m_nAmbientRed_=(unsigned char*)0xB7C3C8;
-unsigned int *CTimeCycle_m_NumBoxes_=(unsigned int*)0xB7C480;
-unsigned int *CTimeCycle_m_bExtraColourOn_=(unsigned int*)0xB7C484;
-
-
-
-*CTimeCycle_m_BrightnessAddedToAmbientBlue_=1.0*drand();
-*CTimeCycle_m_BrightnessAddedToAmbientGreen_=1.0*drand();
-*CTimeCycle_m_BrightnessAddedToAmbientRed_=1.0*drand();
-*CTimeCycle_m_ExtraColourInter_=1024.0*drand();
-*CTimeCycle_m_ExtraColourWeatherType_=1024.0*drand();
-*CTimeCycle_m_ExtraColour_=1024.0*drand();
-*CTimeCycle_m_FogReduction_=1024.0*drand();
-*CTimeCycle_m_fShadowDisplacementY_=1.0*drand();
-*CTimeCycle_m_fShadowDisplacementX_=1.0*drand();
-*CTimeCycle_m_fShadowSideY_=1.0*drand();
-*CTimeCycle_m_fShadowSideX_=1.0*drand();
-*CTimeCycle_m_fShadowFrontY_=1.0*drand();
-*CTimeCycle_m_fShadowFrontX_=1.0*drand();
-*CTimeCycle_m_CurrentStoredValue_=1024.0*drand();
-*CTimeCycle_m_nDirectionalMult_=255.0*drand();
-*CTimeCycle_m_nWaterFogAlpha_=255.0*drand();
-*CTimeCycle_m_nHighLightMinIntensity_=255.0*drand();
-*CTimeCycle_m_fCloudAlpha_=255.0*drand();
-*CTimeCycle_m_fPostFx2Alpha_=255.0*drand();
-*CTimeCycle_m_fPostFx2Blue_=255.0*drand();
-*CTimeCycle_m_fPostFx2Green_=255.0*drand();
-*CTimeCycle_m_fPostFx2Red_=255.0*drand();
-*CTimeCycle_m_fPostFx1Alpha_=255.0*drand();
-*CTimeCycle_m_fPostFx1Blue_=255.0*drand();
-*CTimeCycle_m_fPostFx1Green_=255.0*drand();
-*CTimeCycle_m_fPostFx1Red_=255.0*drand();
-*CTimeCycle_m_fWaterAlpha_=255.0*drand();
-*CTimeCycle_m_fWaterBlue_=255.0*drand();
-*CTimeCycle_m_fWaterGreen_=255.0*drand();
-*CTimeCycle_m_fWaterRed_=255.0*drand();
-*CTimeCycle_m_nFluffyCloudsBottomBlue_=255.0*drand();
-*CTimeCycle_m_nFluffyCloudsBottomGreen_=255.0*drand();
-*CTimeCycle_m_nFluffyCloudsBottomRed_=255.0*drand();
-*CTimeCycle_m_nLowCloudsBlue_=255.0*drand();
-*CTimeCycle_m_nLowCloudsGreen_=255.0*drand();
-*CTimeCycle_m_nLowCloudsRed_=255.0*drand();
-*CTimeCycle_m_fLightsOnGroundBrightness_=255.0*drand();
-*CTimeCycle_m_nPoleShadowStrength_=255.0*drand();
-*CTimeCycle_m_nLightShadowStrength_=255.0*drand();
-*CTimeCycle_m_nShadowStrength_=255.0*drand();
-*CTimeCycle_m_fSpriteBrightness_=255.0*drand();
-*CTimeCycle_m_fSpriteSize_=25.0*drand();
-*CTimeCycle_m_fSunSize_=25.0*drand();
-*CTimeCycle_m_nSunCoronaBlue_=255.0*drand();
-*CTimeCycle_m_nSunCoronaGreen_=255.0*drand();
-*CTimeCycle_m_nSunCoronaRed_=255.0*drand();
-*CTimeCycle_m_nSunCoreBlue_=255.0*drand();
-*CTimeCycle_m_nSunCoreGreen_=255.0*drand();
-*CTimeCycle_m_nSunCoreRed_=255.0*drand();
-*CTimeCycle_m_nSkyBottomBlue_=255.0*drand();
-*CTimeCycle_m_nSkyBottomGreen_=255.0*drand();
-*CTimeCycle_m_nSkyBottomRed_=255.0*drand();
-*CTimeCycle_m_nSkyTopBlue_=255.0*drand();
-*CTimeCycle_m_nSkyTopGreen_=255.0*drand();
-*CTimeCycle_m_nSkyTopRed_=255.0*drand();
-*CTimeCycle_m_nAmbientBlue_Obj_=255.0*drand();
-*CTimeCycle_m_nAmbientGreen_Obj_=255.0*drand();
-*CTimeCycle_m_nAmbientRed_Obj_=255.0*drand();
-*CTimeCycle_m_nAmbientBlue_=255.0*drand();
-*CTimeCycle_m_nAmbientGreen_=255.0*drand();
-*CTimeCycle_m_nAmbientRed_=255.0*drand();
-*CTimeCycle_m_bExtraColourOn_=1.0*drand();
-
-
-float *_CWeather_TrafficLightsBrightness=(float*)0xC812A8;
-float *_CWeather_Earthquake=(float*)0xC81340;
-unsigned int *_CWeather_CurrentRainParticleStrength=(unsigned int*)0xC812B0;
-unsigned int *_CWeather_LightningStartY=(unsigned int*)0xC812B4;
-unsigned int *_CWeather_LightningStartX=(unsigned int*)0xC812B8;
-int *_CWeather_LightningFlashLastChange=(int*)0xC812BC;
-int *_CWeather_WhenToPlayLightningSound=(int*)0xC812C0;
-unsigned int *_CWeather_LightningDuration=(unsigned int*)0xC812C4;
-unsigned int *_CWeather_LightningStart=(unsigned int*)0xC812C8;
-float *_CWeather_HeadLightsSpectrum=(float*)0xC812D0;
-float *_CWeather_WaterFogFXControl=(float*)0xC81338;
-float *_CWeather_HeatHazeFXControl=(float*)0xC812D8;
-float *_CWeather_HeatHaze=(float*)0xC812DC;
-float *_CWeather_SunGlare=(float*)0xC812E0;
-float *_CWeather_Rainbow=(float*)0xC812E4;
-float *_CWeather_Wavyness=(float*)0xC812E8;
-float *_CWeather_WindClipped=(float*)0xC812EC;
-float *_CWeather_Wind=(float*)0xC812F0;
-float *_CWeather_Sandstorm=(float*)0xC812F4;
-float *_CWeather_Rain=(float*)0xC81324;
-float *_CWeather_InTunnelness=(float*)0xC81334;
-float *_CWeather_WaterDepth=(float*)0xC81330;
-float *_CWeather_UnderWaterness=(float*)0xC8132C;
-float *_CWeather_ExtraSunnyness=(float*)0xC812F8;
-float *_CWeather_Foggyness_SF=(float*)0xC812FC;
-float *_CWeather_Foggyness=(float*)0xC81300;
-float *_CWeather_CloudCoverage=(float*)0xC81304;
-float *_CWeather_WetRoads=(float*)0xC81308;
-float *_CWeather_InterpolationValue=(float*)0xC8130C;
-
-*_CWeather_TrafficLightsBrightness=1.0*drand();
-*_CWeather_Earthquake=0;
-*_CWeather_CurrentRainParticleStrength=1024.0*drand();
-*_CWeather_LightningStartY=1024.0*drand();
-*_CWeather_LightningStartX=1024.0*drand();
-*_CWeather_LightningFlashLastChange=1024.0*drand();
-*_CWeather_WhenToPlayLightningSound=1024.0*drand();
-*_CWeather_LightningDuration=1024.0*drand();
-*_CWeather_LightningStart=1024.0*drand();
-*_CWeather_HeadLightsSpectrum=1.0*drand();
-*_CWeather_WaterFogFXControl=1.0*drand();
-*_CWeather_HeatHazeFXControl=1.0*drand();
-*_CWeather_HeatHaze=100.0*drand();
-*_CWeather_SunGlare=100.0*drand();
-*_CWeather_Rainbow=100.0*drand();
-*_CWeather_Wavyness=100000.0*drand();
-*_CWeather_WindClipped=1.0*drand();
-*_CWeather_Wind=100.0*drand();
-*_CWeather_Sandstorm=100.0*drand();
-*_CWeather_Rain=100.0*drand();
-*_CWeather_InTunnelness=1.0*drand();
-*_CWeather_WaterDepth=1.0*drand();
-*_CWeather_UnderWaterness=100.0*drand();
-*_CWeather_ExtraSunnyness=100.0*drand();
-*_CWeather_Foggyness_SF=100.0*drand();
-*_CWeather_Foggyness=100.0*drand();
-*_CWeather_CloudCoverage=100.0*drand();
-*_CWeather_WetRoads=100.0*drand();
-*_CWeather_InterpolationValue=1.0*drand();
-
-int *weatherType_int=(int*)0x72A590;
-*weatherType_int=20.0*drand();
-
-*_CWeather_Earthquake=0;
-*_CWeather_Wind=0;
-*_CWeather_LightningDuration=0;
-
-
-
-
-
+//satellite_view();
+/*
+void *ccamera=(void*)theCamera; // == 0xB6F028
+void *rwcamera=*(void**)(ccamera+0x954); //rwcamera(!)
+float *cam_matrix=*(void**)(rwcamera+4);
+int *cam_matrix_int=(int*)cam_matrix;
+cam_matrix[0]=0;
+cam_matrix[1]=0;
+cam_matrix[2]=6.626173192E-37;
+cam_matrix[3]=6.626173192E-37;
+cam_matrix[4]=-1;
+cam_matrix[5]=0;
+cam_matrix[6]=0;
+cam_matrix[7]=4.203895393E-45;
+cam_matrix[8]=0;
+cam_matrix[9]=1;
+cam_matrix[10]=4.882812391E-6;
+cam_matrix[11]=1.968934005E-19;
+cam_matrix[12]=0;
+cam_matrix[13]=4.882812391E-6;
+cam_matrix[14]=-1;
+cam_matrix[15]=-7.681843486E31;
+cam_matrix[19]=2.866497357E32;
+cam_matrix[20]=-1;
+cam_matrix[21]=0;
+cam_matrix[22]=0;
+cam_matrix_int[23]=3; // ???
+*/
 
 }
 
 
 if(GetAsyncKeyState(VK_F12)&1){
-placesShow();
-MessageJumpQ("Show must go on!", 1000, 0, false);
+//*(char*)0x707FA0=0xc3; // don't render player's shadow, don't work
+
+// disable all shadows
+*(char*)(0x55FC5E)=0x90;
+*(char*)(0x55FC5F)=0x90;
+*(char*)(0x55FC60)=0x90;
+*(char*)(0x55FC61)=0x90;
+*(char*)(0x55FC89)=0x90;
+*(char*)(0x55FC89+1)=0x90;
+*(char*)(0x55FC89+2)=0x90;
+*(char*)(0x55FC89+3)=0x90;
+*(float*)0xB7C4E8=0; // shadow strength
+MessageJumpQ("no shadow", 1000, 0, false);
+
+
 }
 
 

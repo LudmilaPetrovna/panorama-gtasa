@@ -288,3 +288,21 @@ void *rwcam=*(void**)(scene+4);
 *(int*)(rwcam+0x14)=t;
 }
 
+float findGroundZForCoordByFile(float ox, float oy){
+
+static FILE *height_map=NULL;
+int px,py,p;
+if(!height_map){height_map=fopen("heightmap.bin","rb");}
+if(height_map){
+px=(int)ox+3000.0;
+py=(int)oy+3000.0;
+if(px>=0 && px<6000 && py>=0 && py<6000){
+fseek(height_map,(px+py*6000)*4,SEEK_SET);
+fread(&ox,1,4,height_map);
+return(ox);
+}
+}
+return -20000.0;
+}
+
+

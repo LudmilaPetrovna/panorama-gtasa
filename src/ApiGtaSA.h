@@ -47,6 +47,7 @@ void rollTime();
 void flyTo(float tx, float ty, float tz, float heading, int interior, int need_detect_land);
 void setCameraFromToFov(float sx, float sy, float sz, float tx, float ty, float tz, float fov);
 void setCameraFromState(CCamera *state);
+void setCameraProjection(int t);
 CVector *getPlayerVector();
 void *getPlayerCped();
 void cpedSetHeading(void *cped, float angle);
@@ -200,6 +201,8 @@ volatile extern unsigned char *clockMinutes;
 volatile extern unsigned char *clockHours;
 extern CCamera *theCamera;
 extern float *GAME_GRAVITY;
+
+float findGroundZForCoordByFile(float,float);
 
 
 #endif
