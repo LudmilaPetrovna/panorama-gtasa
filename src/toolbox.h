@@ -1,4 +1,4 @@
-/*
+
 
 typedef struct{
 char vidcam;
@@ -16,6 +16,6 @@ char underwater;
 }FILTERS_PARAMS;
 
 
-*/
+
 void memory512(int avail);
 void work_at_background();

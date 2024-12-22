@@ -5,6 +5,20 @@
 #include "toolbox.h"
 
 
+
+void disable_ped_vehicle_shadows(){
+// disable all shadows
+*(char*)(0x55FC5E)=0x90;
+*(char*)(0x55FC5F)=0x90;
+*(char*)(0x55FC60)=0x90;
+*(char*)(0x55FC61)=0x90;
+*(char*)(0x55FC89)=0x90;
+*(char*)(0x55FC89+1)=0x90;
+*(char*)(0x55FC89+2)=0x90;
+*(char*)(0x55FC89+3)=0x90;
+*(float*)0xB7C4E8=0; // shadow strength
+}
+
 void set_green_screen_mode(){
 
 

@@ -409,7 +409,9 @@ restoreFreeze();
 
 
 void cityScanner(){
-// Летаем над городом по кривой Гильберта и строим карту высот. Часто вылетаем. Вообще, это был одноразовый таск, потому с терпением и такой-то матерью я снова и снова запускал игрушку, пока не сделал всю карту высот.
+// Летаем над городом по кривой Гильберта и строим карту высот. Часто вылетаем.
+// Вообще, это был одноразовый таск, потому с терпением и такой-то матерью я снова
+// и снова запускал игрушку, пока не сделал всю карту высот.
 
 uint32_t q,w;
 int a,s,t;
@@ -542,7 +544,7 @@ double scale_y=scale/scenecam->view_window_y;
 double tile_size=6000.0/(double)world_size;
 
 scenecam->recip_view_window_x=scale_x;
-scenecam->recip_view_window_y=scale_y;
+scenecam->recip_view_window_y=scale_y/aspect;
 
 screenshoter.taken=0;
 screenshoter.delay=-1;
@@ -565,7 +567,7 @@ cj_pos->x=pos_x;
 cj_pos->y=pos_y;
 cj_pos->z=pos_z;
 
-theCamera->m_fNearClipScript=satellite_cam_height-pos_z-500.0;
+theCamera->m_fNearClipScript=satellite_cam_height-pos_z-500.0; // 500 not enough for Chilliad mountain, but seens okay
 theCamera->m_bUseNearClipScript=1;
 
 // look to sky
@@ -896,7 +898,7 @@ RwCamDummy *scenecam=(RwCamDummy*)*(void**)(0xC17038+4);
 screenshoter.taken=0;
 screenshoter.delay=-1;
 screenshoter.active=1;
-prepareFreeze();
+//prepareFreeze();
 
 
 *(uint8_t*)0x7EE432=0x90;
@@ -907,10 +909,6 @@ prepareFreeze();
 *(uint8_t*)0x7EE440=0x90;
 
 
-for(ff=1;ff<100;ff++){
-
-for(ww=0;ww<=50;ww+=10){
-for(qq=0;qq<1;qq++){
 theCamera->m_nTypeOfSwitch=2;
 theCamera->m_bStartInterScript=1;
 theCamera->m_bLookingAtVector=1;
@@ -919,41 +917,55 @@ theCamera->m_bLookingAtPlayer=0;
 theCamera->m_nWhoIsInControlOfTheCamera=1;
 theCamera->m_bGarageFixedCamPositionSet=0;
 theCamera->m_bBlockZoom=1;
-theCamera->m_vecFixedModeVector.x=qq;
-theCamera->m_vecFixedModeVector.y=ww;
+theCamera->m_vecFixedModeVector.x=0;
+theCamera->m_vecFixedModeVector.y=0;
 theCamera->m_vecFixedModeVector.z=0;
-theCamera->m_vecFixedModeSource.x=qq;
-theCamera->m_vecFixedModeSource.y=(double)ww+.0001;
+theCamera->m_vecFixedModeSource.x=0;
+theCamera->m_vecFixedModeSource.y=.0001;
 theCamera->m_vecFixedModeSource.z=50;
-theCamera->m_fFOVNew=90.0;
-setGameFPSLimit(105);
-refreshFreeze();
+theCamera->m_fFOVNew=120.0;
 
-
-double scale_x=scenecam->view_window_x/(double)ff;
-double scale_y=scenecam->view_window_y/(double)ff;
+double scale_x=scenecam->view_window_x/100.0;
+double scale_y=scenecam->view_window_y/100.0;
 
 scenecam->recip_view_window_x=scale_x;
 scenecam->recip_view_window_y=scale_y;
 
 
+Sleep(1000);
+/*
 sprintf(screenshoter.filename,"ortho-scale%d-%dx%d.jpg",ff,qq,ww);
-Sleep(100);
-
 int oldval=screenshoter.taken;
 screenshoter.delay=7;
 while(screenshoter.taken==oldval){ // wait to take screenshot
 Sleep(10);
 }
-
-}
-}
-}
+*/
 
 }
 
 if(GetAsyncKeyState(VK_F11)&1){
 //satellite_view();
+
+}
+
+
+if(GetAsyncKeyState(VK_F12)&1){
+MessageJumpQ("no shadow", 1000, 0, false);
+
+
+}
+
+
+Sleep(20);
+}
+
+}
+
+
+
+
+
 /*
 void *ccamera=(void*)theCamera; // == 0xB6F028
 void *rwcamera=*(void**)(ccamera+0x954); //rwcamera(!)
@@ -982,34 +994,14 @@ cam_matrix[22]=0;
 cam_matrix_int[23]=3; // ???
 */
 
-}
+/* //remove ped shadow?
+void *cped=getPlayerCped();
+int model_id=*(short*)(cped+0x22);
+void *models_info=(void*)0xA9B0C8;
+void *model=(void*)(models_info+model_id*0x308);
+int16_t *model_flags=(int16_t*)(model+0x12);
+*model_flags|=1<<5;
 
-
-if(GetAsyncKeyState(VK_F12)&1){
-//*(char*)0x707FA0=0xc3; // don't render player's shadow, don't work
-
-// disable all shadows
-*(char*)(0x55FC5E)=0x90;
-*(char*)(0x55FC5F)=0x90;
-*(char*)(0x55FC60)=0x90;
-*(char*)(0x55FC61)=0x90;
-*(char*)(0x55FC89)=0x90;
-*(char*)(0x55FC89+1)=0x90;
-*(char*)(0x55FC89+2)=0x90;
-*(char*)(0x55FC89+3)=0x90;
-*(float*)0xB7C4E8=0; // shadow strength
-MessageJumpQ("no shadow", 1000, 0, false);
-
-
-}
-
-
-Sleep(20);
-}
-
-}
-
-
-
-
+*(float*)(model+0x18)=0.01;
+*/
 
