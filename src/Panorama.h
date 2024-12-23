@@ -1,7 +1,7 @@
 #include <windows.h>
 
 
-
+/*
 typedef struct{
 char vidcam;
 char liftcam;
@@ -42,10 +42,10 @@ float *_CWeather_CloudCoverage=(float*)0xC81304;
 float *_CWeather_WetRoads=(float*)0xC81308;
 *_CWeather_CurrentRainParticleStrength=1024.0*drand();
 *_CWeather_Wind=0;
-*_CWeather_LightningDuration=0;*/
+*_CWeather_LightningDuration=0;*
 
 }FILTERS_PARAMS;
-
+*/
 
 typedef struct{
 double fps_on_screenshots;

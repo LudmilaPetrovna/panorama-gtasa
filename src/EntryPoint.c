@@ -1,12 +1,22 @@
 #include <windows.h>
 #include <time.h>
 
+#include "ApiGtaSA.h"
 #include "Panorama.h"
 #include "Hooks.h"
 
 #include "toolbox.h"
 
 // Very simple DLL entry
+
+
+DWORD WINAPI Watchdog(LPVOID lpParam){
+Sleep(2000);
+if(*CTimer_m_FrameCounter<5){
+exit(0);
+}
+return 0;
+}
 
 
 BOOL APIENTRY DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved){
@@ -19,6 +29,7 @@ memory512(0);
 work_at_background();
 hooks_install();
 CreateThread(NULL,0,MyASIThread,NULL,0,&dwTID);
+CreateThread(NULL,0,Watchdog,NULL,0,&dwTID);
 }
 
 return TRUE;
