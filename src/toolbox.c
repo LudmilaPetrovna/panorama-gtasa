@@ -5,6 +5,26 @@
 #include "toolbox.h"
 
 
+void unlock_recip_view_window(){
+// unlock recip_view_window
+// don't fight with us values
+*(uint8_t*)0x7EE432=0x90;
+*(uint8_t*)0x7EE433=0x90;
+*(uint8_t*)0x7EE434=0x90;
+*(uint8_t*)0x7EE43E=0x90;
+*(uint8_t*)0x7EE43F=0x90;
+*(uint8_t*)0x7EE440=0x90;
+}
+
+
+void disable_clouds(){
+// remove clouds
+*(uint8_t*)0x713950=0xc3; // disable clouds
+*(uint8_t*)0x716380=0xc3; // disable volumetric clouds
+*(uint8_t*)0x716C90=0xc3; // disable moving fog
+*(uint8_t*)0x7154B0=0xc3; // disable bottom from height
+memset((void*)0x53E121,0x90,5);
+}
 
 void disable_ped_vehicle_shadows(){
 // disable all shadows

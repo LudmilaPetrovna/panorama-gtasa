@@ -12,6 +12,7 @@
 #include "hilbert.h"
 #include "Screenshot.h"
 #include "log.h"
+#include "toolbox.h"
 
 // TODO: add more fun points of game, game is so beautiful!
 typedef struct{
@@ -506,23 +507,7 @@ double satellite_cam_height=tan((90.0-wantFov/2.0)*M_PI/180.0)*6000.0/2.0*aspect
 // remove UI
 *CTheScripts__bDisplayHud=0;
 *CHud__bScriptDontDisplayRadar=1;
-
-// remove clouds
-*(uint8_t*)0x713950=0xc3; // disable clouds
-*(uint8_t*)0x716380=0xc3; // disable volumetric clouds
-*(uint8_t*)0x716C90=0xc3; // disable moving fog
-*(uint8_t*)0x7154B0=0xc3; // disable bottom from height
-memset((void*)0x53E121,0x90,5);
-
-// don't scale image to full window
-//memset((void*)0x7EE432,90,15);
-//*(uint8_t*)0x7EE410=0xc3;
-*(uint8_t*)0x7EE432=0x90;
-*(uint8_t*)0x7EE433=0x90;
-*(uint8_t*)0x7EE434=0x90;
-*(uint8_t*)0x7EE43E=0x90;
-*(uint8_t*)0x7EE43F=0x90;
-*(uint8_t*)0x7EE440=0x90;
+disable_clouds();
 
 // find player position vector;
 CVector *cj_pos=getPlayerVector();
@@ -532,6 +517,7 @@ setAspectRatio(aspect);
 setCameraFromToFov(0,-0.1,satellite_cam_height,0,0,0,wantFov);
 
 Sleep(5000);
+unlock_recip_view_window();
 
 RwCamDummy *scenecam=(RwCamDummy*)*(void**)(0xC17038+4);
 
@@ -559,7 +545,7 @@ sprintf(screenshoter.filename,"tile-%dx%d.jpg",tile_x,tile_y);
 if(GetFileAttributes(screenshoter.filename)!=INVALID_FILE_ATTRIBUTES){continue;}
 
 double pos_x=tile_size*tile_x-3000.0+tile_size/2.0;
-double pos_y=tile_size*tile_y-3000.0+tile_size/2.0;
+double pos_y=3000.0-tile_size*tile_y+tile_size/2.0;
 double pos_z=findGroundZForCoordByFile(pos_x,pos_y)+1.0;
 if(pos_z<0){pos_z=0;}
 
@@ -891,20 +877,15 @@ setCameraProjection(type_projection+1);
 
 if(GetAsyncKeyState(VK_F10)&1){
 
+double magicFoV=120.0;
 
 // remove UI
 *CTheScripts__bDisplayHud=0;
 *CHud__bScriptDontDisplayRadar=1;
+disable_clouds();
+No_more_haze();
 
-// remove clouds
-*(uint8_t*)0x713950=0xc3; // disable clouds
-*(uint8_t*)0x716380=0xc3; // disable volumetric clouds
-*(uint8_t*)0x716C90=0xc3; // disable moving fog
-*(uint8_t*)0x7154B0=0xc3; // disable bottom from height
-memset((void*)0x53E121,0x90,5);
-
-
-int level=5;
+int level=6;
 int world_size=powl(2,level);
 double tile_size=6000.0/(double)world_size;
 double target_x,target_y,target_z;
@@ -916,32 +897,10 @@ screenshoter.active=1;
 setCameraProjection(2);
 waitNFrames(2);
 
-theCamera->m_nTypeOfSwitch=2;
-theCamera->m_bStartInterScript=1;
-theCamera->m_bLookingAtVector=1;
-theCamera->m_nModeToGoTo=15;
-theCamera->m_bLookingAtPlayer=0;
-theCamera->m_nWhoIsInControlOfTheCamera=1;
-theCamera->m_bGarageFixedCamPositionSet=0;
-theCamera->m_bBlockZoom=1;
-theCamera->m_vecFixedModeVector.x=target_x;
-theCamera->m_vecFixedModeVector.y=target_y;
-theCamera->m_vecFixedModeVector.z=target_z;
-theCamera->m_vecFixedModeSource.x=target_x;
-theCamera->m_vecFixedModeSource.y=target_y-.0001;
-theCamera->m_vecFixedModeSource.z=target_z+30.0;
-theCamera->m_fFOVNew=120.0;
+setCameraFromToFov(target_x,target_y-.0001,target_z+30.0,target_x,target_y,target_z,magicFoV);
 waitNFrames(2);
 
-// unlock recip_view_window
-*(uint8_t*)0x7EE432=0x90;
-*(uint8_t*)0x7EE433=0x90;
-*(uint8_t*)0x7EE434=0x90;
-*(uint8_t*)0x7EE43E=0x90;
-*(uint8_t*)0x7EE43F=0x90;
-*(uint8_t*)0x7EE440=0x90;
-
-
+unlock_recip_view_window();
 prepareFreeze();
 
 RwCamDummy *scenecam=(RwCamDummy*)*(void**)(0xC17038+4);
@@ -949,8 +908,9 @@ RwCamDummy *scenecam=(RwCamDummy*)*(void**)(0xC17038+4);
 double aspect=((double)*LastScreenWidth)/(*LastScreenHeight);
 double view_window_x=scenecam->view_window_x;
 double view_window_y=view_window_x/aspect;
-double scale_x=1.0/view_window_x/100.0;
-double scale_y=1.0/view_window_y/100.0;
+double magic=75.0*32.0/world_size;
+double scale_x=1.0/view_window_x/magic;
+double scale_y=1.0/view_window_y/magic;
 
 scenecam->recip_view_window_x=scale_x;
 scenecam->recip_view_window_y=scale_y;
@@ -960,13 +920,13 @@ int tiles_count=hilbert_points_at_level(level);
 int tile_id;
 uint32_t tile_x,tile_y;
 
-for(tile_id=0;tile_id<tiles_count && !*menuActive;tile_id++){
+for(tile_id=333;tile_id<tiles_count && !*menuActive;tile_id++){
 hilbert(tile_id,level,&tile_x,&tile_y);
 sprintf(screenshoter.filename,"tile-%dx%d.jpg",tile_x,tile_y);
 if(GetFileAttributes(screenshoter.filename)!=INVALID_FILE_ATTRIBUTES){continue;}
 
 target_x=tile_size*(double)tile_x+tile_size/2.0-3000.0;
-target_y=tile_size*(double)tile_y+tile_size/2.0-3000.0;
+target_y=3000.0-tile_size*(double)tile_y+tile_size/2.0;
 target_z=findGroundZForCoordByFile(target_x,target_y);
 if(target_z<0){target_z=0;}
 
@@ -976,26 +936,20 @@ player->x=target_x;
 player->y=target_y;
 player->z=target_z+1.0;
 
-theCamera->m_vecFixedModeVector.x=target_x;
-theCamera->m_vecFixedModeVector.y=target_y;
-theCamera->m_vecFixedModeVector.z=target_z;
-theCamera->m_vecFixedModeSource.x=target_x;
-theCamera->m_vecFixedModeSource.y=target_y-.01;
-theCamera->m_vecFixedModeSource.z=target_z+30.0;
-theCamera->m_nTypeOfSwitch=2;
-theCamera->m_bStartInterScript=1;
-theCamera->m_bLookingAtVector=1;
-theCamera->m_nModeToGoTo=15;
-theCamera->m_bLookingAtPlayer=0;
-theCamera->m_nWhoIsInControlOfTheCamera=1;
-theCamera->m_bGarageFixedCamPositionSet=0;
-theCamera->m_bBlockZoom=1;
-theCamera->m_fFOVNew=120.0;
 
-setGameFPSLimit(105);
 refreshFreeze();
+addTwoStars();
+setGameFPSLimit(105);
 
-Sleep(2000);
+int q;
+double ph,iph;
+for(q=0;q<=20;q++){
+ph=(double)q/20.0;
+iph=1.0-ph;
+setCameraFromToFov(target_x,target_y-.01,target_z+30.0*ph,target_x+sin(q)*iph*200.0,target_y+cos(q)*iph*200.0,target_z,magicFoV);
+Sleep(100);
+}
+setCameraFromToFov(target_x,target_y-.01,target_z+30,target_x,target_y,target_z,magicFoV);
 
 int oldval=screenshoter.taken;
 screenshoter.delay=7;

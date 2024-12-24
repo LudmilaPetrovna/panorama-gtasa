@@ -17,5 +17,8 @@ char underwater;
 
 
 
+void disable_clouds();
+void unlock_recip_view_window();
+void No_more_haze();
 void memory512(int avail);
 void work_at_background();

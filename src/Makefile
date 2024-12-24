@@ -2,7 +2,7 @@ CC:=/usr/bin/i686-w64-mingw32-gcc
 CXX:=/usr/bin/i686-w64-mingw32-g++
 CFLAGS:=-Wall -ggdb3 -Wno-comment -Wno-unused-variable -Wno-narrowing
 CXXFLAGS:=$(CFLAGS) -std=gnu++17 -fpermissive -Ikthook -Ikthook/include -Ikthook/xbyak -Ikthook/ktsignal/include -Imingw-std-threads-master
-LDFLAGS=-lgdi32 -luser32 -lwinmm -ldxguid -ld3d9 -ld3dx9 -ldwmapi -shared -static-libgcc -static-libstdc++ -lole32
+LDFLAGS=-lgdi32 -luser32 -lwinmm -ldxguid -ld3d9 -ld3dx9 -ldwmapi -lole32 -shared -static-libgcc -static-libstdc++
 OUTNAME=Panorama.asi
 C_OBJECTS:=ApiGtaSA.o Panorama.o EntryPoint.o Freeze.o hilbert.o toolbox.o SpawnObject.o bmp.o kthook/hde/hde32.o
 CXX_OBJECTS:=Screenshot.o Hooks.o log.o

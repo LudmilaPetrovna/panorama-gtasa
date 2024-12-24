@@ -67,8 +67,8 @@ frozen.displayHud=*CTheScripts__bDisplayHud;
 frozen.hideRadar=*CHud__bScriptDontDisplayRadar;
 frozen.volumeSfx=getVolumeSfx();
 
-*timeScale=0.0;
-*timeStep=0.0;
+//*timeScale=0.0;
+//*timeStep=0.0;
 
 cpedSetVisibility(frozen.cped, 0);
 
@@ -90,15 +90,15 @@ void refreshFreeze(){
 *weatherOldType=frozen.weatherOldType;
 
 // Pause game time, we don't want any movements during screenshot session
-*timeScale=0.0;
-*timeStep=0.0;
+//*timeScale=0.0;
+//*timeStep=0.0;
 
 // change cped
 void *cped=getPlayerCped();
 *(float*)(cped+0x540)=99999.99; // health
 
 
-setGravity(0);
+//setGravity(0);
 }
 
 
