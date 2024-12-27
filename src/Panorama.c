@@ -334,6 +334,97 @@ restoreFreeze();
 }
 
 
+
+void createPanoLevels(){
+
+double jumpTo=0.0;
+double fov=60.0;
+double aspect=(double)(*LastScreenWidth)/(*LastScreenHeight);
+
+double fov_v=fov/aspect;
+int levels=ceil(180.0/fov_v);
+double rad_per_level=180.0/(double)levels;
+void *cped=getPlayerCped();
+CVector *player_pos=getPlayerVector();
+
+char framename[32];
+
+double sx=player_pos->x,sy=player_pos->y,sz=player_pos->z+jumpTo;
+double tx=0,ty=0,tz=0;
+
+FILE *pto=NULL;
+
+
+//prepareFreeze();
+setAspectRatio(aspect);
+setWindynessForCurrentWeather(0);
+setDrawingDistance(8000.0);
+*CTheScripts__bDisplayHud=0;
+*CHud__bScriptDontDisplayRadar=1;
+cpedSetVisibility(cped, 0);
+
+*darkness=0;
+*darknessEnable=0;
+setGameFPSLimit(200);
+/*
+sprintf(panoName,"pano-%d-%dx%dx%d",(int)time(0),(int)player_pos->x,(int)player_pos->y,(int)player_pos->z);
+sprintf(path,"%s\\%s",panoRoot,panoName);
+CreateDirectory(path,NULL);
+
+sprintf(path,"%s\\%s\\pano-build.bat",panoRoot,panoName);
+pto=fopen(path,"wt");
+fprintf(pto,"\"V:\\h\\Hugin-2023.0.0-win64\\nona\" -o pano-%dx%dx%d pano.pto",(int)player_pos->x,(int)player_pos->y,(int)player_pos->z);
+fclose(pto);
+
+sprintf(path,"%s\\%s\\pano.pto",panoRoot,panoName);
+pto=fopen(path,"wt");
+fprintf(pto,"p w4096 h2048 f2 v360 n\"PNG\" R0 T\"UINT8\"\n");
+fprintf(pto,"m i6\n");
+*/
+
+int l;
+for(l=0;l<levels;l++){
+if(*menuActive){return;}
+
+double level_center=rad_per_level*l+rad_per_level/2.0-90.0;
+int cols_per_level_top=360.0*cos((level_center-rad_per_level/2.0)*M_PI/180.0)/fov;
+int cols_per_level_bottom=360.0*cos((level_center+rad_per_level/2.0)*M_PI/180.0)/fov;
+int cols_per_level=cols_per_level_top>cols_per_level_bottom?cols_per_level_top:cols_per_level_bottom;
+
+//sprintf(framename,"frame-%.7d.png",q);
+//fprintf(pto,"i f0 w%d h%d r%f p%f y%f v%f n\"%s\"\n",*LastScreenWidth,*LastScreenHeight,0.0,(float)(89.0-178.0*q/totalFrames),(float)(360.0*rows*q/totalFrames),fov,framename);
+int xx;
+double xrotth,yrotth;
+double sphereRadius=10.0;
+yrotth=level_center*M_PI/180.0;
+for(xx=0;xx<cols_per_level;xx++){
+xrotth=(double)xx*M_PI*2.0/cols_per_level;
+double radius1=cos(yrotth)*sphereRadius;
+tz=sz+sin(yrotth)*sphereRadius;
+tx=sx+sin(xrotth)*radius1;
+ty=sy+cos(xrotth)*radius1;
+
+//refreshFreeze();
+
+setCameraFromToFov(sx,sy,sz,tx,ty,tz,fov);
+
+//sprintf(tmp,"%d/%d",q,totalFrames);
+//MessageJumpQ(tmp, 400, 0, false);
+
+// In early versions, I tried to save images via this call. But, unfortuanly, game always crashed after 178-180 saved images.
+//char *take_photo=(char*)0x00C8A7C1;
+//*take_photo=1;
+
+// Wait for new redraw cycle
+waitNFrames(2);
+Sleep(50);
+
+}
+}
+
+}
+
+
 void placesShow(){
 double sx,sy,sz;
 double tx,ty,tz;
@@ -971,10 +1062,9 @@ if(GetAsyncKeyState(VK_F11)&1){
 if(GetAsyncKeyState(VK_F12)&1){
 
 
+createPanoLevels();
 
-
-MessageJumpQ("no rescale", 1000, 0, false);
-
+MessageJumpQ("levels", 1000, 0, false);
 
 }
 
