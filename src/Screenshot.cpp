@@ -23,27 +23,20 @@
 
 SCREENSHOTER screenshoter={0};
 
-int width=800,height=600;
+int width=-1,height=-1;
 
 IDirect3DSurface9* pDestTarget=NULL;
 IDirect3DDevice9 *d3ddev;
 IDirect3DSurface9* renderTarget=NULL;
-
-
-void do_screenshot(){
-screenshoter.delay=5;
-screenshoter.active=1;
-sprintf(screenshoter.filename,"screenshot-%d.png",(int)time(0));
-}
-
+D3DLOCKED_RECT lockedRect;
 HANDLE g_hChildStd_IN_Rd=NULL;
 HANDLE g_hChildStd_IN_Wr=NULL;
 HANDLE g_hChildStd_OUT_Rd=NULL;
 HANDLE g_hChildStd_OUT_Wr=NULL;
 
 void ffmpeg_spawn(){
-
-char szCmdline[]="ffmpeg -v 0 -f rawvideo -s 800x600 -r 60 -pix_fmt bgra -i - -vcodec hevc_nvenc -b:v 1000k -y ffmpeg-stream.mp4";
+static char exec[1024];
+sprintf(exec,"ffmpeg -v 0 -f rawvideo -s %dx%d -r 60 -pix_fmt bgra -i - -vcodec hevc_nvenc -b:v 3000k -y \"%s\"",width,height,screenshoter.filename);
 PROCESS_INFORMATION piProcInfo; 
 STARTUPINFO siStartInfo;
 BOOL bSuccess=FALSE;
@@ -58,21 +51,16 @@ if(!SetHandleInformation(g_hChildStd_OUT_Rd, HANDLE_FLAG_INHERIT, 0)){abort();}
 if(!CreatePipe(&g_hChildStd_IN_Rd, &g_hChildStd_IN_Wr, &saAttr, 0)){abort();}
 if(!SetHandleInformation(g_hChildStd_IN_Wr, HANDLE_FLAG_INHERIT, 0)){abort();}
 
-// Create the child process
-
 ZeroMemory(&piProcInfo, sizeof(PROCESS_INFORMATION));
+ZeroMemory(&siStartInfo, sizeof(STARTUPINFO) );
+siStartInfo.cb = sizeof(STARTUPINFO); 
+siStartInfo.hStdError=g_hChildStd_OUT_Wr;
+siStartInfo.hStdOutput=g_hChildStd_OUT_Wr;
+siStartInfo.hStdInput=g_hChildStd_IN_Rd;
+siStartInfo.dwFlags|=STARTF_USESTDHANDLES|SW_HIDE;
  
-   ZeroMemory( &siStartInfo, sizeof(STARTUPINFO) );
-   siStartInfo.cb = sizeof(STARTUPINFO); 
-   siStartInfo.hStdError = g_hChildStd_OUT_Wr;
-   siStartInfo.hStdOutput = g_hChildStd_OUT_Wr;
-   siStartInfo.hStdInput = g_hChildStd_IN_Rd;
-   siStartInfo.dwFlags |= STARTF_USESTDHANDLES|SW_HIDE;
- 
-// Create the child process. 
-    
-   bSuccess = CreateProcessA(NULL,
-      szCmdline,     // command line
+screenshoter.ffmpeg=CreateProcessA(NULL,
+      exec,     // command line
       NULL,          // process security attributes
       NULL,          // primary thread security attributes
       TRUE,          // handles are inherited
@@ -81,123 +69,128 @@ ZeroMemory(&piProcInfo, sizeof(PROCESS_INFORMATION));
       NULL,          // use parent's current directory 
       &siStartInfo,  // STARTUPINFO pointer 
       &piProcInfo);  // receives PROCESS_INFORMATION 
-   
-   // If an error occurs, exit the application. 
-   if ( ! bSuccess ){
+
+if(!screenshoter.ffmpeg){
 logme("can't spawn ffmpeg");
 abort();
 }
 
-      CloseHandle(piProcInfo.hProcess);
-      CloseHandle(piProcInfo.hThread);
-      CloseHandle(g_hChildStd_OUT_Wr);
-      CloseHandle(g_hChildStd_IN_Rd);
-screenshoter.is_stream=1;
+logme("we spawned ffmpeg");
+
+CloseHandle(piProcInfo.hProcess);
+CloseHandle(piProcInfo.hThread);
+CloseHandle(g_hChildStd_OUT_Wr);
+CloseHandle(g_hChildStd_IN_Rd);
 }
 
 void ffmpeg_write(void *pixels, int size){
-DWORD dwWritten;
-
-int bSuccess=WriteFile(g_hChildStd_IN_Wr, pixels, size, &dwWritten, NULL);
-if(!bSuccess){
+int written;
+if(!screenshoter.ffmpeg){ffmpeg_spawn();}
+if(!WriteFile(g_hChildStd_IN_Wr,pixels,size,&written,NULL)){
 logme("can't write to ffmpeg");
 abort();
 }
 
-if((int)size!=(int)dwWritten){
-logme("can't write to ffmpeg: written %d, expect %d",(int)dwWritten,size);
+if(size!=written){
+logme("can't write to ffmpeg: written %d, expect %d",written,size);
 abort();
 }
- 
-logme("ffmpeg written %d",(int)dwWritten);
-//CloseHandle(g_hChildStd_IN_Wr);
+
+logme("ffmpeg written %d",written);
+
+if(!screenshoter.is_stream){
+screenshot_stop();
+}
 }
 
 
-void save_surf_as_png(){
+void ffmpeg_push_frame(){
+d3ddev->GetRenderTargetData(renderTarget,pDestTarget);
+pDestTarget->LockRect(&lockedRect,NULL,D3DLOCK_READONLY);
+ffmpeg_write(lockedRect.pBits,width*height*4);
+pDestTarget->UnlockRect();
 }
-
 
 void on_frame_screenshot(){
-
-HRESULT hr;
-D3DLOCKED_RECT lockedRect;
-
 if(!screenshoter.active){return;}
 
+/*
 if(screenshoter.is_stream){
-hr=d3ddev->GetRenderTargetData(renderTarget,pDestTarget);
-int ret=(int)pDestTarget->LockRect(&lockedRect,NULL,/*D3DLOCK_NO_DIRTY_UPDATE|D3DLOCK_NOSYSLOCK|*/D3DLOCK_READONLY);
-ffmpeg_write(lockedRect.pBits,800*600*4);
-pDestTarget->UnlockRect();
+ffmpeg_push_frame();
 return;
-
 }
+*/
 
-if(screenshoter.delay>=0){
+if(screenshoter.delay>0){
 screenshoter.delay--;
+return;
 }
 if(screenshoter.delay!=0){return;}
+screenshoter.delay--;
 
-d3ddev=*(IDirect3DDevice9 **)0xC97C28;
-
+// take data
 //d3ddev->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &pDestTarget);
-
-// alternative
-if(!renderTarget){
-hr=d3ddev->GetRenderTarget(0, &renderTarget);
-}
-if(FAILED(hr)||!renderTarget){
-logme("Can't get render target");
-exit(0);abort();}
-
-
-
-
-if(!pDestTarget){
-width=*LastScreenWidth;
-height=*LastScreenWidth;
-
-D3DSURFACE_DESC desc;
-hr = renderTarget->GetDesc(&desc);
-if(FAILED(hr)){
-logme("Can't get descr");
-exit(0);abort();
-}
-logme("We created offscreen buffer %dx%d (%d/%d)",desc.Width, desc.Height, desc.Format,D3DFMT_A8R8G8B8);
-d3ddev->CreateOffscreenPlainSurface(desc.Width, desc.Height, desc.Format /*D3DFMT_A8R8G8B8*/, D3DPOOL_SYSTEMMEM, &pDestTarget, NULL);
-}
-
-
-hr=d3ddev->GetRenderTargetData(renderTarget,pDestTarget);
+HRESULT hr=d3ddev->GetRenderTargetData(renderTarget,pDestTarget);
 if(FAILED(hr)){
 logme("Can't get render target data");
 exit(0);
 }
 
+if(strstr(screenshoter.filename,".mp4")){
+ffmpeg_push_frame();
+}
 
-strcpy(screenshoter.writing_filename,screenshoter.filename);
-
-if(strstr(screenshoter.writing_filename,".bmp")){
+if(strstr(screenshoter.filename,".bmp")){
 D3DXSaveSurfaceToFile(screenshoter.filename, D3DXIFF_BMP, pDestTarget, 0, NULL );
 }
 
-if(strstr(screenshoter.writing_filename,".png")){
-ffmpeg_spawn();
-
-int ret=(int)pDestTarget->LockRect(&lockedRect,NULL,/*D3DLOCK_NO_DIRTY_UPDATE|D3DLOCK_NOSYSLOCK|*/D3DLOCK_READONLY);
-ffmpeg_write(lockedRect.pBits,800*600*4);
-pDestTarget->UnlockRect();
-
-
-//D3DXSaveSurfaceToFile(screenshoter.filename, D3DXIFF_PNG, pDestTarget, 0, NULL );
+if(strstr(screenshoter.filename,".png")){
+D3DXSaveSurfaceToFile(screenshoter.filename, D3DXIFF_PNG, pDestTarget, 0, NULL );
 }
 
-if(strstr(screenshoter.writing_filename,".jpg")){
+if(strstr(screenshoter.filename,".jpg")){
 D3DXSaveSurfaceToFile(screenshoter.filename, D3DXIFF_JPG, pDestTarget, 0, NULL );
 }
 
 screenshoter.taken++;
-
 return;
 }
+
+void screenshoter_init(){
+d3ddev=*(IDirect3DDevice9 **)0xC97C28;
+width=*LastScreenWidth;
+height=*LastScreenHeight;
+d3ddev->GetRenderTarget(0, &renderTarget);
+
+D3DSURFACE_DESC desc;
+renderTarget->GetDesc(&desc);
+
+if(desc.Width!=width || desc.Height!=height || desc.Format!=D3DFMT_A8R8G8B8){
+logme("Can't init screenshoter: we expect %dx%d (%d), but got %dx%d (%d)",width, height, (int)D3DFMT_A8R8G8B8, desc.Width, desc.Height, desc.Format);
+abort();
+}
+d3ddev->CreateOffscreenPlainSurface(width, height, D3DFMT_A8R8G8B8, D3DPOOL_SYSTEMMEM, &pDestTarget, NULL);
+
+screenshoter.taken=0;
+screenshoter.inited=1;
+}
+
+void screenshot_start(char *filename, int delay, int is_stream){
+if(!screenshoter.inited){
+screenshoter_init();
+}
+strcpy(screenshoter.filename,filename);
+screenshoter.delay=delay;
+screenshoter.is_stream=is_stream;
+screenshoter.active=1;
+}
+
+void screenshot_stop(){
+logme("we closing ffmpeg");
+screenshoter.is_stream=0;
+CloseHandle(g_hChildStd_IN_Wr);
+CloseHandle(g_hChildStd_OUT_Rd);
+logme("we closed ffmpeg");
+
+}
+

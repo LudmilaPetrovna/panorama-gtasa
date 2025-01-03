@@ -430,6 +430,93 @@ screenshoter.active=0;
 }
 
 
+void create_pano_hilbert_trivial(){
+
+double jumpTo=0.0;
+double fov=40.0;
+double aspect=(double)(*LastScreenWidth)/(*LastScreenHeight);
+double fov_v=atan(tan(fov/2.0*M_PI/180.0)/aspect)*2.0*180.0/M_PI; // by ChatGPT
+void *cped=getPlayerCped();
+CVector *player_pos=getPlayerVector();
+
+int pass_x=ceil(358.0/fov);
+int pass_y=ceil(178.0/fov_v);
+int level=ceil(log2(pass_x>pass_y?pass_x:pass_y));
+int count=hilbert_points_at_level(level);
+int side=hilbert_side_at_level(level);
+
+static char info[1000];
+sprintf(info,"hilpano %d level, side %d, count %d",level,side,count);
+MessageJumpQ(info, 1000, 0, false);
+
+
+char framename[32];
+
+double sx=player_pos->x,sy=player_pos->y,sz=player_pos->z+jumpTo;
+double tx=0,ty=0,tz=0;
+
+FILE *pto=NULL;
+
+
+setGameFPSLimit(200);
+
+sprintf(panoName,"pano-%d-%dx%dx%d",(int)time(0),(int)player_pos->x,(int)player_pos->y,(int)player_pos->z);
+sprintf(path,"%s\\%s",panoRoot,panoName);
+CreateDirectory(path,NULL);
+
+sprintf(path,"%s\\%s\\pano-build.bat",panoRoot,panoName);
+pto=fopen(path,"wt");
+fprintf(pto,"\"T:\\Program Files\\Hugin\\bin\\nona\" -o pano-%dx%dx%d pano.pto",(int)player_pos->x,(int)player_pos->y,(int)player_pos->z);
+fclose(pto);
+//return;
+
+sprintf(path,"%s\\%s\\pano.pto",panoRoot,panoName);
+pto=fopen(path,"wt");
+fprintf(pto,"p w4096 h2048 f2 v360 n\"PNG\" R0 T\"UINT8\"\n");
+fprintf(pto,"m i6\n");
+
+uint32_t tile_x,tile_y;
+
+static char panofile[1024];
+sprintf(panofile,"%s\\%s\\pano.mp4",panoRoot,panoName);
+
+
+int q;
+int framenum=0;
+for(q=0;q<count&&!*menuActive;q++){
+hilbert(q,level,&tile_x,&tile_y);
+
+double rad_x=358.0*((double)tile_x/side)-179.0;
+double rad_y=89.0-178.0*((double)tile_y/side);
+
+int xx;
+double xrotth,yrotth;
+double sphereRadius=10.0;
+xrotth=rad_x/180.0*M_PI;
+yrotth=rad_y/180.0*M_PI;
+double radius1=cos(yrotth)*sphereRadius;
+tz=sz+sin(yrotth)*sphereRadius;
+tx=sx+sin(xrotth)*radius1;
+ty=sy+cos(xrotth)*radius1;
+setCameraFromToFov(sx,sy,sz,tx,ty,tz,fov);
+Sleep(20);
+
+sprintf(framename,"frame-%.7d.jpg",++framenum);
+
+fprintf(pto,"i f0 w%d h%d r%f p%f y%f v%f n\"%s\"\n",*LastScreenWidth,*LastScreenHeight,0.0,(float)(yrotth*180.0/M_PI),(float)(xrotth*180.0/M_PI),fov,framename);
+
+int oldval=screenshoter.taken;
+screenshot_start(panofile,2,1);
+while(screenshoter.taken==oldval){ // wait to take screenshot
+Sleep(10);
+}
+
+
+}
+
+screenshoter.active=0;
+}
+
 void placesShow(){
 double sx,sy,sz;
 double tx,ty,tz;
@@ -1065,8 +1152,7 @@ if(GetAsyncKeyState(VK_F11)&1){
 
 
 if(GetAsyncKeyState(VK_F12)&1){
-do_screenshot();
-
+create_pano_hilbert_trivial();
 //createPanoLevels();
 //MessageJumpQ("levels", 1000, 0, false);
 
