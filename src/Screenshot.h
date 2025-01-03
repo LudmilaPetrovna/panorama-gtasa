@@ -8,6 +8,7 @@ int delay;
 int taken;
 char filename[256];
 char writing_filename[256];
+int is_stream;
 }SCREENSHOTER;
 
 extern SCREENSHOTER screenshoter;
