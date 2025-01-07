@@ -6,6 +6,7 @@
 #include "Hooks.h"
 
 #include "toolbox.h"
+#include "Webmenu.h"
 
 // Very simple DLL entry
 
@@ -30,6 +31,8 @@ work_at_background();
 hooks_install();
 CreateThread(NULL,0,MyASIThread,NULL,0,&dwTID);
 CreateThread(NULL,0,Watchdog,NULL,0,&dwTID);
+webmenu_start();
+
 }
 
 return TRUE;
