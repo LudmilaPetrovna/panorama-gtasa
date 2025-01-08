@@ -445,6 +445,12 @@ req_pos++;
 value[value_pos]=0;
 trace("we have memwrite command to 0x%x, type: %c, new value: \"%s\"\n",addr,type,value);
 
+if(type=='c' || type=='b'){
+*(int8_t*)addr=atoi(value);
+}
+if(type=='C'){
+*(uint8_t*)addr=atoi(value);
+}
 if(type=='f'){
 *(float*)addr=atof(value);
 }
@@ -476,6 +482,12 @@ req_pos++;
 
 if(type=='f'){
 out_buf+=sprintf(out_buf,"%c%u=%.7f\n",type,addr,*(float*)addr);
+}
+if(type=='b' || type=='c'){
+out_buf+=sprintf(out_buf,"%c%u=%d\n",type,addr,(int)*(uint8_t*)addr);
+}
+if(type=='C'){
+out_buf+=sprintf(out_buf,"%c%u=%u\n",type,addr,(int)*(uint8_t*)addr);
 }
 if(type=='I'){
 out_buf+=sprintf(out_buf,"%c%u=%u\n",type,addr,*(unsigned int*)addr);
