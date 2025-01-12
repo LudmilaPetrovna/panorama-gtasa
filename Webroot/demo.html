@@ -1,0 +1,140 @@
+<html><body>
+
+<div id=menu></div>
+
+<img src=map.jpg onclick=move_CJ(this)>
+
+<script>
+//var SERVER="http://192.168.198.134:8888/";
+var SERVER="http://192.168.1.10:8888/";
+var menu=[];
+var backmenu={};
+var namemenu={};
+
+fetch(SERVER+"menu").then(a=>a.text()).then(a=>init_form(a));
+
+var type_map={
+"i":"range",
+"I":"range",
+"s":"range",
+"S":"range",
+"f":"range",
+"A":"text",
+"b":"checkbox",
+"t":"button"
+};
+
+function init_form(m){
+menu=eval(m);
+var q;
+for(q in menu){
+el_name=menu[q].type+menu[q].addr;
+backmenu[el_name]=q;
+namemenu[menu[q].label]=q;
+}
+
+gen_form();
+}
+
+function gen_form(){
+var out="";
+var q;
+for(q in menu){
+el_name=menu[q].type+menu[q].addr;
+if(menu[q].type=='T'){
+out+="<h1>"+menu[q].label+"</h1>";
+continue;
+}
+
+adv="";
+if(menu[q].type=='i' || menu[q].type=='f'){
+adv+="min="+menu[q].hint[0]+" max="+menu[q].hint[1]+" ";
+}
+if(menu[q].type=='i'){
+adv+="step=1 ";
+}
+if(menu[q].type=='f'){
+adv+="step=.0001 ";
+}
+
+act="oninput=writemem(this)";
+preview="<input type=text id=mem"+el_name+" readonly disabled>";
+val="";
+
+if(menu[q].type=='t'){
+act="onclick=memc("+menu[q].addr+")";
+preview="";
+val=menu[q].label;
+}
+
+out+=menu[q].label+preview+"<br><input style=width:350px type="+type_map[menu[q].type]+" id="+el_name+" "+adv+" "+act+" value="+val+"><hr>"
+}
+
+document.getElementById("menu").innerHTML=out;
+}
+
+function writemem(s){
+var sname=s.id;
+var pr=document.getElementById("mem"+sname);
+var val=s.type=="checkbox"?(s.checked?1:0):s.value;
+var req="memw"+sname+"="+val;
+pr.value=val;
+if(backmenu[sname] && menu[backmenu[sname]].apply){
+req+="&memc("+menu[backmenu[sname]].apply+")";
+}
+fetch(SERVER,{method:'POST',headers:{"Content-Type":"application/x-www-form-urlencoded"},body:req}).then(a=>a.text()).then(a=>console.log(a));
+
+}
+
+
+function pull_mem_request(){
+var req="";
+var q;
+for(q in menu){
+req+="memr"+menu[q].type+menu[q].addr+"&";
+}
+fetch(SERVER,{method:'POST',headers:{"Content-Type":"application/x-www-form-urlencoded"},body:req}).then(a=>a.text()).then(a=>{console.log(a);mem_update(a)});
+}
+
+function mem_update(req){
+var lines=req.split("\n");
+var q,parts;
+for(q in lines){
+parts=lines[q].split("=");
+if(parts.length!=2){continue;}
+var el=document.getElementById("mem"+parts[0]);
+if(!el){console.log("Can't find control for \""+parts[0]+"\" field");}
+if(el){
+el.value=parts[1];
+document.getElementById(parts[0]).value=parts[1];
+}
+}
+}
+
+function memc(addr){
+fetch(SERVER,{method:'POST',headers:{"Content-Type":"application/x-www-form-urlencoded"},body:"memc="+addr}).then(a=>a.text()).then(a=>{console.log(a)});
+}
+
+//setInterval(pull_mem_request,1000);
+
+function move_CJ(e){
+var ox=event.pageX-e.offsetLeft;
+var oy=event.pageY-e.offsetTop;
+var map_x=ox/1024*6000-3000;
+var map_y=3000-oy/1024*6000;
+
+var req="";
+req+="memwf"+menu[namemenu.move_map_x].addr+"="+map_x+"&";
+req+="memwf"+menu[namemenu.move_map_y].addr+"="+map_y+"&";
+req+="memc="+menu[namemenu.move_map_y].apply;
+
+fetch(SERVER,{method:'POST',headers:{"Content-Type":"application/x-www-form-urlencoded"},body:req}).then(a=>a.text()).then(a=>console.log(a));
+
+console.log([map_x,map_y]);
+
+
+}
+
+
+</script>
+

@@ -1,0 +1,29 @@
+<html><body>
+<form method=post action=>
+<textarea id=console cols=50 rows=10></textarea><br>
+<input type=text id=cmd><input type=button id=btn value=send><input type=submit value=post>
+
+
+<script>
+
+var cn=document.getElementById("console");
+var ci=document.getElementById("cmd");
+var cb=document.getElementById("btn");
+var ws=new WebSocket('ws://192.168.198.134:3000')
+
+ws.onopen=function(){
+console.log('ws opened on browser')
+}
+
+ws.onmessage=function(message){
+console.log(`message received`, message.data)
+cn.value+=message.data+"\n";
+}
+
+cb.onclick=function(){
+ws.send(ci.value+"\n");
+ci.value="";
+ci.focus();
+}
+</script>
+
