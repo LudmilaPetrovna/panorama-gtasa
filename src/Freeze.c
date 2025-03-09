@@ -94,8 +94,14 @@ void refreshFreeze(){
 //*timeStep=0.0;
 
 // change cped
-void *cped=getPlayerCped();
-*(float*)(cped+0x540)=99999.99; // health
+CPed *cped=getPlayerCped();
+//*(float*)(cped+0x540)=99999.99; // health
+cped->m_fHealth=99999.99;
+cped->m_fMaxHealth=99999.99;
+cped->m_fArmour=99999.99;
+cped->m_nPedFlags.bWantedByPolice=0;
+*(int*)0x8CDEE4=0; // max wanted level
+*(int*)0x8CDEE8=0; // max chaos level
 
 
 //setGravity(0);

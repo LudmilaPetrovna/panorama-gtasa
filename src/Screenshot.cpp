@@ -128,6 +128,8 @@ return;
 if(screenshoter.delay!=0){return;}
 screenshoter.delay--;
 
+logme("targets: %p / %p",renderTarget,pDestTarget);
+
 // take data
 //d3ddev->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &pDestTarget);
 HRESULT hr=d3ddev->GetRenderTargetData(renderTarget,pDestTarget);
@@ -179,10 +181,11 @@ void screenshot_start(char *filename, int delay, int is_stream){
 if(!screenshoter.inited){
 screenshoter_init();
 }
+if(filename){
 strcpy(screenshoter.filename,filename);
+}
 screenshoter.delay=delay;
 screenshoter.is_stream=is_stream;
-screenshoter.active=1;
 }
 
 void screenshot_stop(){

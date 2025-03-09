@@ -1059,7 +1059,7 @@ setCameraProjection(type_projection+1);
 }
 
 if(GetAsyncKeyState(VK_F10)&1){
-
+// ortographic projection
 double magicFoV=120.0;
 
 // remove UI
@@ -1068,14 +1068,15 @@ double magicFoV=120.0;
 disable_clouds();
 No_more_haze();
 
-int level=6;
+int level=7;
 int world_size=powl(2,level);
 double tile_size=6000.0/(double)world_size;
 double target_x,target_y,target_z;
 
 screenshoter.taken=0;
 screenshoter.delay=-1;
-screenshoter.active=1;
+screenshoter.active=0;
+screenshot_start(NULL,2,1);
 
 setCameraProjection(2);
 waitNFrames(2);
@@ -1102,15 +1103,26 @@ scenecam->recip_view_window_y=scale_y;
 int tiles_count=hilbert_points_at_level(level);
 int tile_id;
 uint32_t tile_x,tile_y;
+float target_z_min,target_z_max;
+CVector pos1,pos2;
 
 for(tile_id=333;tile_id<tiles_count && !*menuActive;tile_id++){
 hilbert(tile_id,level,&tile_x,&tile_y);
-sprintf(screenshoter.filename,"tile-%dx%d.jpg",tile_x,tile_y);
+sprintf(screenshoter.filename,"T:\\GTASA-ForPano\\l7\\tile-%dx%d.jpg",tile_x,tile_y);
 if(GetFileAttributes(screenshoter.filename)!=INVALID_FILE_ATTRIBUTES){continue;}
 
 target_x=tile_size*(double)tile_x+tile_size/2.0-3000.0;
 target_y=3000.0-tile_size*(double)tile_y+tile_size/2.0;
-target_z=findGroundZForCoordByFile(target_x,target_y);
+pos1.x=target_x-tile_size;
+pos1.y=target_y-tile_size;
+pos2.x=target_x+tile_size;
+pos2.y=target_y+tile_size;
+
+findGroundZForCoordRangeByFile(&pos1,&pos2,&target_z_min,&target_z_max);
+logme("height for %.2fx%.2f = [%.3f ... %.3f]",target_x,target_y,target_z_min,target_z_max);
+
+//target_z=findGroundZForCoordByFile(target_x,target_y);
+target_z=target_z_max;
 if(target_z<0){target_z=0;}
 
 //setGravity(0);
@@ -1121,27 +1133,30 @@ player->z=target_z+1.0;
 
 
 refreshFreeze();
-addTwoStars();
 setGameFPSLimit(105);
 
 int q;
 double ph,iph;
+// we need some pause to wait loading
 for(q=0;q<=20;q++){
 ph=(double)q/20.0;
 iph=1.0-ph;
 setCameraFromToFov(target_x,target_y-.01,target_z+30.0*ph,target_x+sin(q)*iph*200.0,target_y+cos(q)*iph*200.0,target_z,magicFoV);
 Sleep(100);
 }
+
 setCameraFromToFov(target_x,target_y-.01,target_z+30,target_x,target_y,target_z,magicFoV);
 
 int oldval=screenshoter.taken;
-screenshoter.delay=7;
+screenshoter.active=1;
+screenshoter.delay=2;
 while(screenshoter.taken==oldval){ // wait to take screenshot
 Sleep(10);
 }
 
 }
 
+screenshot_stop();
 restoreFreeze();
 }
 
@@ -1152,9 +1167,17 @@ if(GetAsyncKeyState(VK_F11)&1){
 
 
 if(GetAsyncKeyState(VK_F12)&1){
-create_pano_hilbert_trivial();
+CPed *cped22=getPlayerCped();
+//*(float*)(cped+0x540)=99999.99; // health
+cped22->m_fHealth=99999.99;
+cped22->m_fMaxHealth=99999.99;
+cped22->m_fArmour=99999.99;
+*(int*)0x8CDEE4=0; // max wanted level
+*(int*)0x8CDEE8=0; // max chaos level
+
+//create_pano_hilbert_trivial();
 //createPanoLevels();
-//MessageJumpQ("levels", 1000, 0, false);
+MessageJumpQ("cheat", 1000, 0, false);
 
 }
 

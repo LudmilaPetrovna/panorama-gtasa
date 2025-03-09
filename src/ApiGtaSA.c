@@ -10,6 +10,7 @@
 
 
 char screenMessage[1024];
+static FILE *height_map=NULL;
 
 
 // float BA6788 - draw distance
@@ -290,7 +291,6 @@ void *rwcam=*(void**)(scene+4);
 
 float findGroundZForCoordByFile(float ox, float oy){
 
-static FILE *height_map=NULL;
 int px,py,p;
 if(!height_map){height_map=fopen("heightmap.bin","rb");}
 if(height_map){
@@ -303,6 +303,32 @@ return(ox);
 }
 }
 return -20000.0;
+}
+
+void findGroundZForCoordRangeByFile(CVector *point1, CVector *point2, float *ret_min, float *ret_max){
+int px,py,ox,oy,p;
+int px1=point1->x<=point2->x?point1->x:point2->x;
+int py1=point1->y<=point2->y?point1->y:point2->y;
+int px2=point1->x>point2->x?point1->x:point2->x;
+int py2=point1->y<point2->y?point1->y:point2->y;
+if(!height_map){height_map=fopen("heightmap.bin","rb");}
+float min=20000,max=-20000,val;
+if(height_map){
+for(oy=py1;oy<=py2;oy++){
+for(ox=px1;ox<=px2;ox++){
+px=(int)ox+3000.0;
+py=(int)oy+3000.0;
+if(px>=0 && px<6000 && py>=0 && py<6000){
+fseek(height_map,(px+py*6000)*4,SEEK_SET);
+fread(&val,1,4,height_map);
+if(min>val){min=val;}
+if(max<val){max=val;}
+}
+}
+}
+}
+*ret_min=min;
+*ret_max=max;
 }
 
 

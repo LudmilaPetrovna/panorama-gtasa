@@ -187,3 +187,8 @@ void nohud(){
 //CHud::GetRidOfAllHudMessages(0);
 }
 
+void no_forbidden_territory(){
+*(uint8_t*)0x441770=0xC3; // no cops after crossing city
+}
+
+

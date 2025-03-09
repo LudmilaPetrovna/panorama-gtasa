@@ -203,7 +203,7 @@ extern CCamera *theCamera;
 extern float *GAME_GRAVITY;
 
 float findGroundZForCoordByFile(float,float);
-
+void findGroundZForCoordRangeByFile(CVector *point1, CVector *point2, float *ret_min, float *ret_max);
 
 #endif
 
