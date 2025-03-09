@@ -52,6 +52,21 @@ player_pos->z=oz;
 }
 
 
+float cam_src_offset[3],cam_dst_offset[3];
+float cam_cj_offset[3];
+void debug_cam(){
+float base[3]={-210,1790,48.54};
+CVector *player=getPlayerVector();
+player->x=base[0]+cam_cj_offset[0];
+player->y=base[1]+cam_cj_offset[1];
+player->z=base[2]+cam_cj_offset[2];
+
+setCameraFromToFov(base[0]+cam_src_offset[0],base[1]+cam_src_offset[1]-.01,base[2]+cam_src_offset[2]+30.0,base[0]+cam_dst_offset[0],base[1]+cam_dst_offset[1],base[2]+cam_dst_offset[2],120.0);
+
+
+}
+
+
 void *menu(){
 static MENUITEM menu[]={
 {"World",'T',123},
@@ -81,6 +96,16 @@ static MENUITEM menu[]={
 {"Map",'T',12345},
 {"move_map_x",'f',&move_map_x,.min=-3000,.max=3000,.apply=&move_CJ},
 {"move_map_y",'f',&move_map_y,.min=-3000,.max=3000,.apply=&move_CJ},
+{"move cam",'T',12345},
+{"cam_src_x",'f',&cam_src_offset[0],.min=-100,.max=100,.apply=&debug_cam},
+{"cam_src_y",'f',&cam_src_offset[1],.min=-100,.max=100,.apply=&debug_cam},
+{"cam_src_z",'f',&cam_src_offset[2],.min=-100,.max=100,.apply=&debug_cam},
+{"cam_dst_x",'f',&cam_dst_offset[0],.min=-100,.max=100,.apply=&debug_cam},
+{"cam_dst_y",'f',&cam_dst_offset[1],.min=-100,.max=100,.apply=&debug_cam},
+{"cam_dst_z",'f',&cam_dst_offset[2],.min=-100,.max=100,.apply=&debug_cam},
+{"cam_cj_x",'f',&cam_cj_offset[0],.min=-100,.max=100,.apply=&debug_cam},
+{"cam_cj_y",'f',&cam_cj_offset[1],.min=-100,.max=100,.apply=&debug_cam},
+{"cam_cj_z",'f',&cam_cj_offset[2],.min=-100,.max=100,.apply=&debug_cam},
 {0,0,0}
 };
 return(&menu);

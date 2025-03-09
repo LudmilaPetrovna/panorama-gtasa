@@ -828,7 +828,15 @@ playSoundId(1083,&pos);
 */
 
 if(GetAsyncKeyState(VK_NUMPAD1)&1){
-satellite_view();
+setCameraProjection(1);
+}
+
+if(GetAsyncKeyState(VK_NUMPAD2)&1){
+setCameraProjection(2);
+}
+
+if(GetAsyncKeyState(VK_NUMPAD3)&1){
+setCameraDefault();
 }
 
 if(GetAsyncKeyState(VK_NUMPAD5)&1){
@@ -977,7 +985,7 @@ places_current%=places_count;
 
 }
 
-
+/*
 if(GetAsyncKeyState(VK_NUMPAD2)&1){
 flyTo(-944.0,2224.0,40.6,90,0,0);
 }
@@ -992,7 +1000,7 @@ for(q=0;q<1200;q++){
 }
 MessageJumpQ("sea level changed", 1000, 0, false);
 }
-
+*/
 
 
 if(GetAsyncKeyState(VK_NUMPAD9)&1){
@@ -1062,9 +1070,7 @@ if(GetAsyncKeyState(VK_F10)&1){
 // ortographic projection
 double magicFoV=120.0;
 
-// remove UI
-*CTheScripts__bDisplayHud=0;
-*CHud__bScriptDontDisplayRadar=1;
+nohud();
 disable_clouds();
 No_more_haze();
 
@@ -1104,21 +1110,18 @@ int tiles_count=hilbert_points_at_level(level);
 int tile_id;
 uint32_t tile_x,tile_y;
 float target_z_min,target_z_max;
-CVector pos1,pos2;
 
 for(tile_id=333;tile_id<tiles_count && !*menuActive;tile_id++){
+tile_x=59;
+tile_y=27;
 hilbert(tile_id,level,&tile_x,&tile_y);
 sprintf(screenshoter.filename,"T:\\GTASA-ForPano\\l7\\tile-%dx%d.jpg",tile_x,tile_y);
 if(GetFileAttributes(screenshoter.filename)!=INVALID_FILE_ATTRIBUTES){continue;}
 
 target_x=tile_size*(double)tile_x+tile_size/2.0-3000.0;
 target_y=3000.0-tile_size*(double)tile_y+tile_size/2.0;
-pos1.x=target_x-tile_size;
-pos1.y=target_y-tile_size;
-pos2.x=target_x+tile_size;
-pos2.y=target_y+tile_size;
 
-findGroundZForCoordRangeByFile(&pos1,&pos2,&target_z_min,&target_z_max);
+findGroundZForCoordRangeByFile(target_x-tile_size-1,target_y-tile_size-1,target_x+tile_size+1,target_y+tile_size+1,&target_z_min,&target_z_max);
 logme("height for %.2fx%.2f = [%.3f ... %.3f]",target_x,target_y,target_z_min,target_z_max);
 
 //target_z=findGroundZForCoordByFile(target_x,target_y);

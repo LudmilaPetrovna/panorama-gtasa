@@ -2,6 +2,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <strings.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 
 #ifdef _WIN32
@@ -33,6 +36,24 @@ Add websocket support
 */
 
 
+#define SYSLOG_HOST "192.168.1.10"
+#define SYSLOG_PORT 514
+
+void syslog_send(char *message){
+static int sockfd=-1;
+static struct sockaddr_in servaddr;
+
+if(sockfd<0){
+memset(&servaddr,0,sizeof(servaddr));
+servaddr.sin_addr.s_addr=inet_addr(SYSLOG_HOST);
+servaddr.sin_port=htons(SYSLOG_PORT);
+servaddr.sin_family=AF_INET;
+sockfd=socket(AF_INET,SOCK_DGRAM,0);
+}
+sendto(sockfd, message, strlen(message), 0, (struct sockaddr *)&servaddr, sizeof(servaddr));
+}
+
+
 #define WEBSERWER_PORT 8888
 #define WEBSERWER_INTERFACE INADDR_ANY
 
@@ -40,8 +61,15 @@ Add websocket support
 #define HTTP_HEADER_OKAY "HTTP/1.0 200 Okaaay\r\nContent-Type: %s\r\nContent-Length: %d\r\nExpires: 0\r\nCache-Control: no-cache\r\nConnection: close\r\n" CORS_STUFF "\r\n"
 #define HTTP_HEADER_REDIRECT "HTTP/1.0 301 Redirect\nLocation: /file/index.html\nConnection: close\n\n"
 
-#define trace(x...) {fprintf(stderr,x);fprintf(stderr,"\n");}
+//#define trace(x...) {fprintf(stderr,x);fprintf(stderr,"\n");}
+//#define crash(x...) {fprintf(stderr,"Aborted at line %s:%d\n",__FILE__,__LINE__);abort();}
+
+#define MERGE_(a,b) a##b
+#define NAMEGEN_(id) MERGE_(uniq_name_,id)
+#define NEWVAR NAMEGEN_(__LINE__)
+#define trace(x...) {char NEWVAR[2560];sprintf(NEWVAR,"<5>: ");sprintf(NEWVAR+5,x);syslog_send(NEWVAR);}
 #define crash(x...) {fprintf(stderr,"Aborted at line %s:%d\n",__FILE__,__LINE__);abort();}
+
 
 enum{
 HTTP_METHOD_UNKNOWN=0,
@@ -155,7 +183,6 @@ menu++;
 }
 out_buf+=sprintf(out_buf,"\n]\n");
 serve_buf(fd,send_buf,"application/json; charset=UTF-8",out_buf-send_buf);
-close(fd);
 }
 
 
@@ -169,7 +196,6 @@ trace("opened %s = %p",filename,f);
 if(!f){
 sprintf(send_buf,"Can't open file \"%s\"!",filename);
 serve_buf(fd,send_buf,"text/plain",strlen(send_buf));
-close(fd);
 return;
 }
 fseek(f,0,SEEK_END);
@@ -208,18 +234,25 @@ default:
 t="text/plain; charset=UTF-8";
 }
 
+trace("mime: %s",t);
+int written;
+
 // send buffers
 sprintf(headers_buf,HTTP_HEADER_OKAY,t,filesize);
-write(fd,headers_buf,strlen(headers_buf));
+written=send(fd,headers_buf,strlen(headers_buf),0);
+trace("written headers: %d",written);
+
 
 while(filesize>0){
 chunk=filesize;
 if(chunk>SEND_BUF_SIZE){chunk=SEND_BUF_SIZE;}
+trace("reading chunk %d",chunk);
 chunk=fread(send_buf,1,chunk,f);
-write(fd,send_buf,chunk);
+trace("read %d",chunk);
+written=send(fd,send_buf,chunk,0);
+trace("written %d/%d",written,chunk);
 filesize-=chunk;
 }
-close(fd);
 
 }
 
@@ -333,7 +366,6 @@ if(method==HTTP_METHOD_UNKNOWN){ // вы тут не хулюганте!
 trace("unknown method");
 closesocket(fd);
 WSACleanup();
-//close(fd);
 return;
 }
 
@@ -366,7 +398,7 @@ content_len=atoi(header_value);
 if(header_name==PH_CONTENT_TYPE_ && ph_value(str)!=PH_APPLICATION_X_WWW_FORM_URLENCODED){
 
 //trace("wrong encoding: %s, wait val %d",header_value, str_val);
-close(fd);return;
+return;
 } // мы хотим только WWW_FORM_URLENCODED!
 header_name=0;
 ph_reset(str);
@@ -403,7 +435,7 @@ content_len=query_len;
 
 if(content_len<=0 || content_offset<0 || content_offset+content_len>req_size){
 trace("wrong input ");
-close(fd);return;
+return;
 }
 
 // exec commands
@@ -435,7 +467,7 @@ addr=addr*10+recv_buf[req_pos]-'0';
 req_pos++;
 }
 if(recv_buf[req_pos++]!='='){
-close(fd);return;
+return;
 }
 value_pos=0;
 while(req_pos<req_size && recv_buf[req_pos]!=' ' && recv_buf[req_pos]!='&'){
@@ -593,6 +625,8 @@ client=accept(server, (struct sockaddr*)&client_addr, &len);
 if(client<0){continue;}
 trace("accepted!");
 serve_client(client);
+closesocket(client);
+close(client);
 trace("client served");
 }
 }

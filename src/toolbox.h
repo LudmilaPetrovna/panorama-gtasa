@@ -24,3 +24,4 @@ void memory512(int avail);
 void work_at_background();
 void remove_annoing_tutorial();
 void no_forbidden_territory();
+void nohud();

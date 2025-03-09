@@ -7,6 +7,7 @@
 #include <math.h>
 
 #include "ApiGtaSA.h"
+#include "log.h"
 
 
 char screenMessage[1024];
@@ -281,6 +282,24 @@ theCamera->m_vecFixedModeSource.z=state->m_vecFixedModeSource.z;
 theCamera->m_fFOVNew=state->m_fFOVNew;
 }
 
+void setCameraDefault(){
+theCamera->m_bJustInitalised=1;
+theCamera->m_bTransitionState=0;
+theCamera->m_bLookingAtPlayer=1;
+theCamera->m_bLookingAtVector=0;
+theCamera->m_bGarageFixedCamPositionSet=0;
+theCamera->m_nWhoIsInControlOfTheCamera=0;
+theCamera->m_bUseNearClipScript=0;
+theCamera->m_bAllow1rstPersonWeaponsCamera=0;
+theCamera->m_bUseScriptZoomValuePed=0;
+theCamera->m_bUseScriptZoomValueCar=0;
+theCamera->m_fAvoidTheGeometryProbsTimer=0.0;
+theCamera->m_bStartInterScript=1;
+theCamera->m_bCameraJustRestored=1;
+theCamera->m_fFOVNew=60.0;
+}
+
+
 void setCameraProjection(int t){
 // t=1 = pespective
 // t=2 = parallel
@@ -305,13 +324,10 @@ return(ox);
 return -20000.0;
 }
 
-void findGroundZForCoordRangeByFile(CVector *point1, CVector *point2, float *ret_min, float *ret_max){
+void findGroundZForCoordRangeByFile(int px1, int py1, int px2, int py2, float *ret_min, float *ret_max){
 int px,py,ox,oy,p;
-int px1=point1->x<=point2->x?point1->x:point2->x;
-int py1=point1->y<=point2->y?point1->y:point2->y;
-int px2=point1->x>point2->x?point1->x:point2->x;
-int py2=point1->y<point2->y?point1->y:point2->y;
 if(!height_map){height_map=fopen("heightmap.bin","rb");}
+//logme("try find height for range: %dx%d ... %dx%d",px1,py1,px2,py2);
 float min=20000,max=-20000,val;
 if(height_map){
 for(oy=py1;oy<=py2;oy++){
@@ -323,6 +339,7 @@ fseek(height_map,(px+py*6000)*4,SEEK_SET);
 fread(&val,1,4,height_map);
 if(min>val){min=val;}
 if(max<val){max=val;}
+//logme("reading coord %dx%d (%dx%d), val:%.3f, range:%.3f...%.3f",px,py,ox,oy,val,min,max);
 }
 }
 }
