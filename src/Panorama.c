@@ -1111,9 +1111,8 @@ int tile_id;
 uint32_t tile_x,tile_y;
 float target_z_min,target_z_max;
 
-for(tile_id=333;tile_id<tiles_count && !*menuActive;tile_id++){
-tile_x=59;
-tile_y=27;
+for(tile_id=0;tile_id<tiles_count && !*menuActive;tile_id++){
+//tile_x=59;tile_y=27;
 hilbert(tile_id,level,&tile_x,&tile_y);
 sprintf(screenshoter.filename,"T:\\GTASA-ForPano\\l7\\tile-%dx%d.jpg",tile_x,tile_y);
 if(GetFileAttributes(screenshoter.filename)!=INVALID_FILE_ATTRIBUTES){continue;}
