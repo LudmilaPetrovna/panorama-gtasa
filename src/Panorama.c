@@ -95,7 +95,9 @@ double drand(){
 return((double)rand()/RAND_MAX);
 }
 
+
 void removeTrash(){
+/*
 WIN32_FIND_DATA ffd;
 sprintf(path,"%s\\*.png",screensSource);
 HANDLE dd=FindFirstFileA(path, &ffd);
@@ -108,7 +110,9 @@ DeleteFile(path);
 }
 }while(FindNextFile(dd,&ffd)!=0);
 }
+*/
 }
+
 
 void waitForFile(char *outname){
 WIN32_FIND_DATA ffd;
@@ -154,38 +158,20 @@ tz=sz+sin(yrotth)*sphereRadius;
 tx=sx+sin(xrotth)*radius1;
 ty=sy+cos(xrotth)*radius1;
 
-refreshFreeze();
-setCameraFromToFov(sx,sy,sz,tx,ty,tz,3.0);
-Sleep(33);
+setCameraFromToFov(sx,sy,sz,tx,ty,tz,30.0);
+Sleep(10);
 }
 
-*darkness=200;
-*darknessEnable=1;
-for(q=0;q<300;q+=1){
-if(GetAsyncKeyState(VK_F7)&1){return;}
-
-xrotth=(360.0*10.0*q/300.0)/180.0*M_PI;
-yrotth=(89.0-178.0*q/300.0)/180.0*M_PI;
-
-radius1=cos(yrotth)*sphereRadius;
-tz=sz+sin(yrotth)*sphereRadius;
-tx=sx+sin(xrotth)*radius1;
-ty=sy+cos(xrotth)*radius1;
-
-refreshFreeze();
-setCameraFromToFov(sx,sy,sz,tx,ty,tz,90.0);
-Sleep(33);
-}
-
+*darkness=0;
+*darknessEnable=0;
 
 }
 
 
-void createPano(){
+void createPano(double sx, double sy, double sz, double fov){
 
 setVolumeSfx(0);
 double jumpTo=0.0;
-double fov=60.0;
 int cols=360.0/fov*3.0+1.0;
 int rows=180.0/fov*3.0+1.0;
 
@@ -193,17 +179,14 @@ int totalFrames=cols*rows;
 
 char framename[32];
 void *cped=getPlayerCped();
-CVector *player_pos=getPlayerVector();
 
-double sx=player_pos->x,sy=player_pos->y,sz=player_pos->z+jumpTo;
+sy+=jumpTo;
+
 double tx=0,ty=0,tz=0;
 double xrotth;
 double yrotth;
 double sphereRadius=10.0;
 double radius1;
-
-
-removeTrash();
 
 FILE *pto=NULL;
 
@@ -219,29 +202,31 @@ setDrawingDistance(8000.0);
 *CHud__bScriptDontDisplayRadar=1;
 cpedSetVisibility(cped, 0);
 
+screenshoter.taken=0;
+screenshoter.delay=-1;
+screenshoter.active=0;
+screenshot_start(NULL,2,1);
+
 
 // First pass, precache
 precachePanoPlace(sx,sy,sz);
 
 // Second pass
-*darkness=0;
-*darknessEnable=0;
-setGameFPSLimit(3);
+setGameFPSLimit(105);
 
-sprintf(panoName,"pano-%d-%dx%dx%d",(int)time(0),(int)player_pos->x,(int)player_pos->y,(int)player_pos->z);
+sprintf(panoName,"pano-%dx%dx%d",(int)sx,(int)sy,(int)sz);
 sprintf(path,"%s\\%s",panoRoot,panoName);
 CreateDirectory(path,NULL);
 
 sprintf(path,"%s\\%s\\pano-build.bat",panoRoot,panoName);
 pto=fopen(path,"wt");
-fprintf(pto,"\"V:\\h\\Hugin-2023.0.0-win64\\nona\" -o pano-%dx%dx%d pano.pto",(int)player_pos->x,(int)player_pos->y,(int)player_pos->z);
+fprintf(pto,"\"T:\\Program Files\\Hugin\\bin\\nona\" -o %s pano.pto",panoName);
 fclose(pto);
 
 sprintf(path,"%s\\%s\\pano.pto",panoRoot,panoName);
 pto=fopen(path,"wt");
 fprintf(pto,"p w4096 h2048 f2 v360 n\"PNG\" R0 T\"UINT8\"\n");
 fprintf(pto,"m i6\n");
-
 
 for(q=0;q<totalFrames;q+=1){
 if(GetAsyncKeyState(VK_F7)&1){is_cancelled=1;goto pano_finish;}
@@ -251,13 +236,15 @@ yrotth=(89.0-178.0*q/totalFrames)/180.0*M_PI;
 sprintf(framename,"frame-%.7d.png",q);
 fprintf(pto,"i f0 w%d h%d r%f p%f y%f v%f n\"%s\"\n",*LastScreenWidth,*LastScreenHeight,0.0,(float)(89.0-178.0*q/totalFrames),(float)(360.0*rows*q/totalFrames),fov,framename);
 
+sprintf(screenshoter.filename,"%s\\%s\\%s",panoRoot,panoName,framename);
+if(GetFileAttributes(screenshoter.filename)!=INVALID_FILE_ATTRIBUTES){continue;}
+
 radius1=cos(yrotth)*sphereRadius;
 tz=sz+sin(yrotth)*sphereRadius;
 tx=sx+sin(xrotth)*radius1;
 ty=sy+cos(xrotth)*radius1;
 
 refreshFreeze();
-
 
 // Remove pause (if any), let's game tick again
 *codePause=0;
@@ -273,21 +260,30 @@ setCameraFromToFov(sx,sy,sz,tx,ty,tz,fov);
 //*take_photo=1;
 
 // Wait for new redraw cycle
-waitNFrames(2);
-Sleep(50);
+//waitNFrames(2);
+
+int oldval=screenshoter.taken;
+screenshoter.active=1;
+screenshoter.delay=2;
+while(screenshoter.taken==oldval){ // wait to take screenshot
+Sleep(10);
+}
+
 
 // Stop time even more, setting game to pause while creating screenshot
-*codePause=1;
-*userPause=1;
+//*codePause=1;
+//*userPause=1;
 
+/*
 keybd_event(VK_MENU,0xb8,0,0);
 keybd_event(VK_SNAPSHOT,0,0,0);
 keybd_event(VK_SNAPSHOT,0,KEYEVENTF_KEYUP,0);
 keybd_event(VK_MENU,0xb8,KEYEVENTF_KEYUP,0);
+*/
 
 //sprintf(path,"%s\\tmp.png",screensTmp);
-sprintf(path,"%s\\%s\\%s",panoRoot,panoName,framename);
-waitForFile(path);
+//sprintf(path,"%s\\%s\\%s",panoRoot,panoName,framename);
+//waitForFile(path);
 
 // launch ffmpeg?
 //sprintf(cmd," -v 0 -i \"%s\" -s %dx%d -y \"%s\\%s\\%s\"",path,width,height,panoRoot,panoName,framename);
@@ -309,7 +305,8 @@ restoreFreeze();
 // Notify user
 if(is_cancelled){
 MessageJumpQ("Panorama is cancelled!", 1000, 0, false);
-} else {
+}
+/* else {
 // Play finish sounds
 setVolumeSfx(64);
 int noise_count=sizeof(noises)/sizeof(noises[0]);
@@ -325,9 +322,11 @@ noise_id%=noise_count;
 }
 
 }
+*/
 
 // second restore to restore sound volume again
 restoreFreeze();
+screenshot_stop();
 
 // TODO: exit game at finish (menu option)
 
@@ -765,6 +764,106 @@ restoreFreeze();
 }
 
 
+void create_world_map_ortographic(){
+
+// ortographic projection
+double magicFoV=120.0;
+
+nohud();
+disable_clouds();
+No_more_haze();
+
+int level=7;
+int world_size=powl(2,level);
+double tile_size=6000.0/(double)world_size;
+double target_x=0,target_y=0,target_z=0;
+
+screenshoter.taken=0;
+screenshoter.delay=-1;
+screenshoter.active=0;
+screenshot_start(NULL,2,1);
+
+setCameraProjection(2);
+waitNFrames(2);
+
+setCameraFromToFov(target_x,target_y-.0001,target_z+30.0,target_x,target_y,target_z,magicFoV);
+waitNFrames(2);
+
+unlock_recip_view_window();
+prepareFreeze();
+
+RwCamDummy *scenecam=(RwCamDummy*)*(void**)(0xC17038+4);
+
+double aspect=((double)*LastScreenWidth)/(*LastScreenHeight);
+double view_window_x=scenecam->view_window_x;
+double view_window_y=view_window_x/aspect;
+double magic=75.0*32.0/world_size;
+double scale_x=1.0/view_window_x/magic;
+double scale_y=1.0/view_window_y/magic;
+
+scenecam->recip_view_window_x=scale_x;
+scenecam->recip_view_window_y=scale_y;
+
+
+int tiles_count=hilbert_points_at_level(level);
+int tile_id;
+uint32_t tile_x,tile_y;
+float target_z_min,target_z_max;
+
+for(tile_id=0;tile_id<tiles_count && !*menuActive;tile_id++){
+//tile_x=59;tile_y=27;
+hilbert(tile_id,level,&tile_x,&tile_y);
+sprintf(screenshoter.filename,"T:\\GTASA-ForPano\\l7\\tile-%dx%d.jpg",tile_x,tile_y);
+if(GetFileAttributes(screenshoter.filename)!=INVALID_FILE_ATTRIBUTES){continue;}
+
+target_x=tile_size*(double)tile_x+tile_size/2.0-3000.0;
+target_y=3000.0-tile_size*(double)tile_y+tile_size/2.0;
+
+findGroundZForCoordRangeByFile(target_x-tile_size-1,target_y-tile_size-1,target_x+tile_size+1,target_y+tile_size+1,&target_z_min,&target_z_max);
+logme("height for %.2fx%.2f = [%.3f ... %.3f]",target_x,target_y,target_z_min,target_z_max);
+
+//target_z=findGroundZForCoordByFile(target_x,target_y);
+target_z=target_z_max;
+if(target_z<0){target_z=0;}
+
+//setGravity(0);
+CVector *player=getPlayerVector();
+player->x=target_x;
+player->y=target_y;
+player->z=target_z+1.0;
+
+
+refreshFreeze();
+setGameFPSLimit(105);
+
+int q;
+double ph,iph;
+// we need some pause to wait loading
+for(q=0;q<=20;q++){
+ph=(double)q/20.0;
+iph=1.0-ph;
+setCameraFromToFov(target_x,target_y-.01,target_z+30.0*ph,target_x+sin(q)*iph*200.0,target_y+cos(q)*iph*200.0,target_z,magicFoV);
+Sleep(100);
+}
+
+setCameraFromToFov(target_x,target_y-.01,target_z+30,target_x,target_y,target_z,magicFoV);
+
+int oldval=screenshoter.taken;
+screenshoter.active=1;
+screenshoter.delay=2;
+while(screenshoter.taken==oldval){ // wait to take screenshot
+Sleep(10);
+}
+
+}
+
+screenshot_stop();
+restoreFreeze();
+
+
+}
+
+
 
 DWORD WINAPI MyASIThread(LPVOID lpParam){
 int q;
@@ -1067,99 +1166,26 @@ setCameraProjection(type_projection+1);
 }
 
 if(GetAsyncKeyState(VK_F10)&1){
-// ortographic projection
-double magicFoV=120.0;
 
-nohud();
-disable_clouds();
-No_more_haze();
+//take bundle of panoramas
+//start point: [-2254,-203.783,35]
+//end point [-2254,429.954,35]
+//height may vary 35..55
 
-int level=7;
-int world_size=powl(2,level);
-double tile_size=6000.0/(double)world_size;
-double target_x,target_y,target_z;
-
-screenshoter.taken=0;
-screenshoter.delay=-1;
-screenshoter.active=0;
-screenshot_start(NULL,2,1);
-
-setCameraProjection(2);
-waitNFrames(2);
-
-setCameraFromToFov(target_x,target_y-.0001,target_z+30.0,target_x,target_y,target_z,magicFoV);
-waitNFrames(2);
-
-unlock_recip_view_window();
-prepareFreeze();
-
-RwCamDummy *scenecam=(RwCamDummy*)*(void**)(0xC17038+4);
-
-double aspect=((double)*LastScreenWidth)/(*LastScreenHeight);
-double view_window_x=scenecam->view_window_x;
-double view_window_y=view_window_x/aspect;
-double magic=75.0*32.0/world_size;
-double scale_x=1.0/view_window_x/magic;
-double scale_y=1.0/view_window_y/magic;
-
-scenecam->recip_view_window_x=scale_x;
-scenecam->recip_view_window_y=scale_y;
-
-
-int tiles_count=hilbert_points_at_level(level);
-int tile_id;
-uint32_t tile_x,tile_y;
-float target_z_min,target_z_max;
-
-for(tile_id=0;tile_id<tiles_count && !*menuActive;tile_id++){
-//tile_x=59;tile_y=27;
-hilbert(tile_id,level,&tile_x,&tile_y);
-sprintf(screenshoter.filename,"T:\\GTASA-ForPano\\l7\\tile-%dx%d.jpg",tile_x,tile_y);
-if(GetFileAttributes(screenshoter.filename)!=INVALID_FILE_ATTRIBUTES){continue;}
-
-target_x=tile_size*(double)tile_x+tile_size/2.0-3000.0;
-target_y=3000.0-tile_size*(double)tile_y+tile_size/2.0;
-
-findGroundZForCoordRangeByFile(target_x-tile_size-1,target_y-tile_size-1,target_x+tile_size+1,target_y+tile_size+1,&target_z_min,&target_z_max);
-logme("height for %.2fx%.2f = [%.3f ... %.3f]",target_x,target_y,target_z_min,target_z_max);
-
-//target_z=findGroundZForCoordByFile(target_x,target_y);
-target_z=target_z_max;
-if(target_z<0){target_z=0;}
-
-//setGravity(0);
 CVector *player=getPlayerVector();
-player->x=target_x;
-player->y=target_y;
-player->z=target_z+1.0;
 
+int px=-2254;
+int py=-203;
+int pz=35;
 
-refreshFreeze();
-setGameFPSLimit(105);
-
-int q;
-double ph,iph;
-// we need some pause to wait loading
-for(q=0;q<=20;q++){
-ph=(double)q/20.0;
-iph=1.0-ph;
-setCameraFromToFov(target_x,target_y-.01,target_z+30.0*ph,target_x+sin(q)*iph*200.0,target_y+cos(q)*iph*200.0,target_z,magicFoV);
-Sleep(100);
+for(py=-203;py<=430;py+=10){// pano every 10 meters
+pz=(int)(45.0+sin((double)py/32.0)*10.0+.5);
+player->x=px;
+player->y=py;
+player->z=pz;
+createPano(px, py, pz, 70.0);
 }
 
-setCameraFromToFov(target_x,target_y-.01,target_z+30,target_x,target_y,target_z,magicFoV);
-
-int oldval=screenshoter.taken;
-screenshoter.active=1;
-screenshoter.delay=2;
-while(screenshoter.taken==oldval){ // wait to take screenshot
-Sleep(10);
-}
-
-}
-
-screenshot_stop();
-restoreFreeze();
 }
 
 if(GetAsyncKeyState(VK_F11)&1){
