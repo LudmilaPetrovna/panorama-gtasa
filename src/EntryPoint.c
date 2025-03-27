@@ -7,6 +7,7 @@
 
 #include "toolbox.h"
 #include "Webmenu.h"
+#include "FileRPC.h"
 
 // Very simple DLL entry
 
@@ -33,6 +34,7 @@ memory512(0);
 CreateThread(NULL,0,MyASIThread,NULL,0,&dwTID);
 CreateThread(NULL,0,Watchdog,NULL,0,&dwTID);
 webmenu_start();
+start_file_rpc();
 remove_annoing_tutorial();
 no_forbidden_territory();
 

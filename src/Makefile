@@ -5,7 +5,7 @@ CXXFLAGS:=$(CFLAGS) -std=gnu++17 -fpermissive -Ikthook -Ikthook/include -Ikthook
 LIBS=-lwsock32 -lgdi32 -luser32 -lwinmm -ldxguid -ld3d9 -ld3dx9 -ldwmapi -lole32
 LDFLAGS= -shared -static-libgcc -static-libstdc++ -lpthread
 OUTNAME=Panorama.asi
-C_OBJECTS:=Webserver.o Webmenu.o ApiGtaSA.o Panorama.o EntryPoint.o Freeze.o hilbert.o toolbox.o SpawnObject.o bmp.o kthook/hde/hde32.o
+C_OBJECTS:=FileRPC.o Webserver.o Webmenu.o ApiGtaSA.o Panorama.o EntryPoint.o Freeze.o hilbert.o toolbox.o SpawnObject.o bmp.o kthook/hde/hde32.o
 CXX_OBJECTS:=Screenshot.o Hooks.o log.o
 
 all: $(OUTNAME)
