@@ -516,6 +516,36 @@ Sleep(10);
 screenshoter.active=0;
 }
 
+
+void do_simple_screenshot(){
+
+setAspectRatio((double)(*LastScreenWidth)/(*LastScreenHeight));
+setDrawingDistance(8000.0);
+setGameFPSLimit(105);
+
+
+screenshoter.taken=0;
+screenshoter.delay=-1;
+screenshoter.active=0;
+screenshot_start(NULL,2,1);
+
+sprintf(screenshoter.filename,"screenshot-%d.png",(int)time(0));
+
+
+int oldval=screenshoter.taken;
+screenshoter.active=1;
+screenshoter.delay=2;
+while(screenshoter.taken==oldval){ // wait to take screenshot
+Sleep(10);
+}
+
+screenshot_stop();
+screenshoter.active=0;
+
+MessageJumpQ(screenshoter.filename, 1000, 0, false);
+
+}
+
 void placesShow(){
 double sx,sy,sz;
 double tx,ty,tz;
@@ -871,6 +901,10 @@ int q;
 HWND activeWindow;
 while(1){
 
+if(GetAsyncKeyState(VK_SCROLL)&1){
+do_simple_screenshot();
+}
+
 activeWindow=GetForegroundWindow();
 if(*userPause || *codePause || *menuActive || *CTimer_m_FrameCounter<50 || activeWindow!=*(void**)0xC97C1C){ // game not active
 
@@ -925,7 +959,7 @@ playSoundId(1083,&pos);
 
 }
 */
-
+/*
 if(GetAsyncKeyState(VK_NUMPAD1)&1){
 setCameraProjection(1);
 }
@@ -937,7 +971,7 @@ setCameraProjection(2);
 if(GetAsyncKeyState(VK_NUMPAD3)&1){
 setCameraDefault();
 }
-
+*/
 if(GetAsyncKeyState(VK_NUMPAD5)&1){
 MessageJumpQ("add light", 1000, 0, false);
 CVector *pos=getPlayerVector();
@@ -1075,16 +1109,20 @@ cj_pos->z=findGroundZForCoordByFile(cj_pos->x,cj_pos->y)+1.0;
 } while(cj_pos->z<0.0);
 continue;
 
-flyTo(places[places_current].x,places[places_current].y,places[places_current].z,places[places_current].heading,places[places_current].interior,0);
-places_current++;
-places_current%=places_count;
 
 
 //flyTo(drand()*5000.0-2500.0,drand()*5000.0-2500.0,1000.0,drand()*360.0,0,1);
 
 }
 
-/*
+if(GetAsyncKeyState(VK_NUMPAD1)&1){
+flyTo(places[places_current].x,places[places_current].y,places[places_current].z,places[places_current].heading,places[places_current].interior,0);
+places_current++;
+places_current%=places_count;
+
+}
+
+
 if(GetAsyncKeyState(VK_NUMPAD2)&1){
 flyTo(-944.0,2224.0,40.6,90,0,0);
 }
@@ -1093,13 +1131,13 @@ if(GetAsyncKeyState(VK_NUMPAD3)&1){
 void *water=(void*)0xC22910;
 int water_vertex_size=20;
 int q;
-float newlevel=drand()*50.0+20.0;
+float newlevel=-2000.0;
 for(q=0;q<1200;q++){
 *(float*)(water+q*water_vertex_size+4)=newlevel;
 }
 MessageJumpQ("sea level changed", 1000, 0, false);
 }
-*/
+
 
 
 if(GetAsyncKeyState(VK_NUMPAD9)&1){
@@ -1190,8 +1228,9 @@ createPano(px, py, pz, 70.0);
 
 if(GetAsyncKeyState(VK_F11)&1){
 //satellite_view();
-
 }
+
+
 
 
 if(GetAsyncKeyState(VK_F12)&1){

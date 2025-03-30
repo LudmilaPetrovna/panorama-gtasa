@@ -13,7 +13,7 @@
 
 
 DWORD WINAPI Watchdog(LPVOID lpParam){
-Sleep(2000);
+Sleep(20000);
 memory512(0);
 if(*CTimer_m_FrameCounter<5){
 exit(0);
@@ -37,6 +37,8 @@ webmenu_start();
 start_file_rpc();
 remove_annoing_tutorial();
 no_forbidden_territory();
+setAspectRatio(1.777777777777777777);
+
 
 }
 
