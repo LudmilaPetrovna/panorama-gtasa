@@ -153,12 +153,12 @@ uint32_t *funcs=NULL;
 SUBS_ITEM *subs=NULL;
 
 
-#define RECV_BUF_SIZE 4096
-#define SEND_BUF_SIZE 4096
-#define HEADERS_BUF_SIZE 4096
-#define STORAGE_BUF_SIZE 4096
-#define FUNCS_BUF_SIZE 4096
-#define SUBS_COUNT_MAX 1024
+#define RECV_BUF_SIZE 40960
+#define SEND_BUF_SIZE 40960
+#define HEADERS_BUF_SIZE 40960
+#define STORAGE_BUF_SIZE 40960
+#define FUNCS_BUF_SIZE 40960
+#define SUBS_COUNT_MAX 10240
 
 
 void serve_buf(int fd, uint8_t *buf, char *type, int len){

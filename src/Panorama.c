@@ -10,6 +10,7 @@
 #include "Freeze.h"
 #include "SpawnObject.h"
 #include "hilbert.h"
+#include "CamRecord.h"
 #include "Screenshot.h"
 #include "log.h"
 #include "toolbox.h"
@@ -972,7 +973,7 @@ if(GetAsyncKeyState(VK_NUMPAD3)&1){
 setCameraDefault();
 }
 */
-if(GetAsyncKeyState(VK_NUMPAD5)&1){
+/*if(GetAsyncKeyState(VK_NUMPAD5)&1){
 MessageJumpQ("add light", 1000, 0, false);
 CVector *pos=getPlayerVector();
 
@@ -985,7 +986,7 @@ ideY, short intensity, unsigned char red, unsigned char green, unsig
 ned char blue, float zDistane, float scale, float drawDistance, bool temporary
 Shadow, float upDistance) {
 */
-CShadows__StoreStaticShadow(
+/*CShadows__StoreStaticShadow(
                 0,
                 2,
                 (void*)0xC403F4,
@@ -1003,7 +1004,7 @@ CShadows__StoreStaticShadow(
                 40.0,
                 0,
                 0.0);
-
+*/
 //AddAnExtraDirectionalLight((void*)0xC17038, pos->x,pos->y,pos->z+2.0, 1.0, 0.0, 0.0);
 
 
@@ -1014,7 +1015,7 @@ unsigned char G, unsigned char B, unsigned char A, const CVector& Position, floa
  unsigned char LOSCheck, unsigned char unused, float normalAngle, bool bNeonFade,
  float PullTowardsCam, bool bFadeIntensity, float FadeSpeed, bool bOnlyFromBelow,
  bool bWhiteCore)
-*/
+*
 
 
 CVector *corona_pos=malloc(sizeof(CVector));
@@ -1046,7 +1047,7 @@ CCoronas__RegisterCorona(
         150.0,
         0,
         0);
-
+*/
 /*
 CPointLights__AddLight(
 0,
@@ -1064,8 +1065,9 @@ CPointLights__AddLight(
         1,
         0);
 */
-}
+//}
 
+/*
 if(GetAsyncKeyState(VK_NUMPAD6)&1){
 MessageJumpQ("add light random", 1000, 0, false);
 CVector *pos=getPlayerVector();
@@ -1087,7 +1089,7 @@ CPointLights__AddLight(
         0);
 
 }
-
+*/
 
 if(GetAsyncKeyState(VK_F6)&1){
 rollTime();
@@ -1138,8 +1140,18 @@ for(q=0;q<1200;q++){
 MessageJumpQ("sea level changed", 1000, 0, false);
 }
 
+if(GetAsyncKeyState(VK_NUMPAD5)&1){
+is_cam_recoding^=1;
+MessageJumpQ(is_cam_recoding?"Started camera path recording":"Recording is stopped", 1000, 0, false);
+}
+
+if(GetAsyncKeyState(VK_NUMPAD6)&1){
+*timeScale=5.0;
+MessageJumpQ("time scale changed", 1000, 0, false);
+}
 
 
+/*
 if(GetAsyncKeyState(VK_NUMPAD9)&1){
 CVector *pos=getPlayerVector();
 pos->x=drand()*6000.0-3000.0;
@@ -1194,7 +1206,7 @@ MessageJumpQ(msg, 1000, 0, false);
 continue;
 
 }
-
+*/
 
 
 if(GetAsyncKeyState(VK_F9)&1){
@@ -1232,7 +1244,7 @@ if(GetAsyncKeyState(VK_F11)&1){
 
 
 
-
+/*
 if(GetAsyncKeyState(VK_F12)&1){
 CPed *cped22=getPlayerCped();
 //*(float*)(cped+0x540)=99999.99; // health
@@ -1247,7 +1259,7 @@ cped22->m_fArmour=99999.99;
 MessageJumpQ("cheat", 1000, 0, false);
 
 }
-
+*/
 
 Sleep(20);
 }

@@ -5,6 +5,7 @@ extern "C" {
 #endif
 
 #include <stdio.h>
+#include <time.h>
 
 FILE *logme_init();
 #define logme(x...) {FILE *f=logme_init();fprintf(f,"%d: ",(int)time(0));fprintf(f,x);fprintf(f,"\n");fflush(f);}

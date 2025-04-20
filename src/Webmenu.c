@@ -3,12 +3,26 @@
 
 #include "ApiGtaSA.h"
 #include "Webserver.h"
+#include <windows.h>
+#include <pthread.h>
 
 
 
 
+pthread_t player_pos_thread;
+CVector player_pos={0,0,0};
+void player_pos_worker(void *a){
+waitNFrames(10);
+void *cped=getPlayerCped();
+CVector *cj=getPlayerVector();
+while(1){
+player_pos.x=cj->x;
+player_pos.y=cj->y;
+player_pos.z=cj->z;
+Sleep(100);
+}
 
-
+}
 
 
 
@@ -33,6 +47,9 @@ float transition;
 }WEATHER;
 
 WEATHER weather_update={0,0,0};
+
+
+
 
 void weather_apply(){
 *weatherInterpolationValue=weather_update.transition;
@@ -69,6 +86,10 @@ setCameraFromToFov(base[0]+cam_src_offset[0],base[1]+cam_src_offset[1]-.01,base[
 
 void *menu(){
 static MENUITEM menu[]={
+{"Player position",'T',123},
+{"pos_x",'f',&player_pos.x,.apply=NULL,.min=-3000,.max=3000,.val=0,.streamable=1},
+{"pos_y",'f',&player_pos.y,.apply=NULL,.min=-3000,.max=3000,.val=0,.streamable=1},
+{"pos_z",'f',&player_pos.z,.apply=NULL,.min=-3000,.max=3000,.val=0,.streamable=1},
 {"World",'T',123},
 {"Clock",'f',&clock_update,.apply=&clock_apply,.min=0,.max=24,.val=2,.streamable=1},
 {"Weather_old",'I',&weather_update.old,.apply=&weather_apply,.min=0,.max=24},
@@ -112,6 +133,8 @@ return(&menu);
 }
 
 void webmenu_start(){
+
 webserver_start(&menu);
+pthread_create(&player_pos_thread, NULL, player_pos_worker, NULL);
 
 }

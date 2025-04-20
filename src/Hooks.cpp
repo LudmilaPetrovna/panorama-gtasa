@@ -10,6 +10,7 @@
 
 #include "log.h"
 #include "Screenshot.h"
+#include "CamRecord.h"
 #include "Hooks.h"
 
 using CTimer__UpdateSignature = void(__cdecl*)();
@@ -23,6 +24,7 @@ kthook::kthook_simple<WndProcSignature> WndProcHook{};
 
 std::optional<HRESULT> D3D9EndScene(const decltype(EndSceneHook)& hook, IDirect3DDevice9* pDevice) {
 on_frame_screenshot();
+on_frame_camrecord();
 
     return std::nullopt;
 }

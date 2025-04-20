@@ -28,13 +28,14 @@ DWORD dwTID;
 srand(time(0));
 
 if(fdwReason==DLL_PROCESS_ATTACH){
+
 work_at_background();
 hooks_install();
 memory512(0);
 CreateThread(NULL,0,MyASIThread,NULL,0,&dwTID);
 CreateThread(NULL,0,Watchdog,NULL,0,&dwTID);
 webmenu_start();
-start_file_rpc();
+//start_file_rpc();
 remove_annoing_tutorial();
 no_forbidden_territory();
 setAspectRatio(1.777777777777777777);
