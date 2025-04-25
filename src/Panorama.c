@@ -1146,7 +1146,7 @@ MessageJumpQ(is_cam_recoding?"Started camera path recording":"Recording is stopp
 }
 
 if(GetAsyncKeyState(VK_NUMPAD6)&1){
-*timeScale=5.0;
+*timeScale=3.0;
 MessageJumpQ("time scale changed", 1000, 0, false);
 }
 
