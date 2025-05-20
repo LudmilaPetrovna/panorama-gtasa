@@ -520,15 +520,19 @@ screenshoter.active=0;
 
 void do_simple_screenshot(){
 
+logme("creating screenshot 1");
 setAspectRatio((double)(*LastScreenWidth)/(*LastScreenHeight));
 setDrawingDistance(8000.0);
 setGameFPSLimit(105);
 
+logme("creating screenshot 2");
 
 screenshoter.taken=0;
 screenshoter.delay=-1;
 screenshoter.active=0;
-screenshot_start(NULL,2,1);
+screenshot_start(NULL,2,0);
+
+logme("creating screenshot 3");
 
 sprintf(screenshoter.filename,"screenshot-%d.png",(int)time(0));
 
@@ -536,14 +540,23 @@ sprintf(screenshoter.filename,"screenshot-%d.png",(int)time(0));
 int oldval=screenshoter.taken;
 screenshoter.active=1;
 screenshoter.delay=2;
+
+logme("creating screenshot 4");
+
 while(screenshoter.taken==oldval){ // wait to take screenshot
 Sleep(10);
 }
 
+logme("creating screenshot 5");
+
 screenshot_stop();
 screenshoter.active=0;
 
+logme("creating screenshot 6");
+
 MessageJumpQ(screenshoter.filename, 1000, 0, false);
+
+logme("creating screenshot 7");
 
 }
 

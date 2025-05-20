@@ -9,7 +9,7 @@ int is_cam_recoding=0;
 FILE *cam_rec_file=NULL;
 
 void on_frame_camrecord(){
-logme("on_frame_");
+//logme("on_frame_");
 
 if(!is_cam_recoding){
 if(cam_rec_file){

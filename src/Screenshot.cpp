@@ -19,7 +19,7 @@
 #include "log.h"
 
 
-
+void screenshoter_init();
 
 SCREENSHOTER screenshoter={0};
 
@@ -114,6 +114,10 @@ pDestTarget->UnlockRect();
 void on_frame_screenshot(){
 if(!screenshoter.active){return;}
 
+if(!screenshoter.inited){
+screenshoter_init();
+}
+
 /*
 if(screenshoter.is_stream){
 ffmpeg_push_frame();
@@ -138,6 +142,8 @@ logme("Can't get render target data");
 exit(0);
 }
 
+logme("got capture");
+
 if(strstr(screenshoter.filename,".mp4")){
 ffmpeg_push_frame();
 }
@@ -147,7 +153,9 @@ D3DXSaveSurfaceToFile(screenshoter.filename, D3DXIFF_BMP, pDestTarget, 0, NULL )
 }
 
 if(strstr(screenshoter.filename,".png")){
+logme("is png1");
 D3DXSaveSurfaceToFile(screenshoter.filename, D3DXIFF_PNG, pDestTarget, 0, NULL );
+logme("is png2");
 }
 
 if(strstr(screenshoter.filename,".jpg")){
@@ -155,6 +163,7 @@ D3DXSaveSurfaceToFile(screenshoter.filename, D3DXIFF_JPG, pDestTarget, 0, NULL )
 }
 
 screenshoter.taken++;
+logme("is done");
 return;
 }
 
@@ -178,9 +187,6 @@ screenshoter.inited=1;
 }
 
 void screenshot_start(char *filename, int delay, int is_stream){
-if(!screenshoter.inited){
-screenshoter_init();
-}
 if(filename){
 strcpy(screenshoter.filename,filename);
 }
