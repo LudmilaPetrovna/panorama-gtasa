@@ -15,6 +15,8 @@
 #include "log.h"
 #include "toolbox.h"
 
+HWND activeWindow;
+
 // TODO: add more fun points of game, game is so beautiful!
 typedef struct{
 float x,y,z,heading;
@@ -912,8 +914,21 @@ restoreFreeze();
 DWORD WINAPI MyASIThread(LPVOID lpParam){
 int q;
 
-HWND activeWindow;
 while(1){
+
+if(GetAsyncKeyState(VK_NUMPAD5)&1){
+is_cam_recoding^=1;
+MessageJumpQ(is_cam_recoding?"Started camera path recording":"Recording is stopped", 1000, 0, false);
+}
+
+}
+}
+
+DWORD WINAPI MyASIThread0(LPVOID lpParam){
+
+while(1){
+
+continue;
 
 if(GetAsyncKeyState(VK_SCROLL)&1){
 do_simple_screenshot();
@@ -1153,10 +1168,6 @@ for(q=0;q<1200;q++){
 MessageJumpQ("sea level changed", 1000, 0, false);
 }
 
-if(GetAsyncKeyState(VK_NUMPAD5)&1){
-is_cam_recoding^=1;
-MessageJumpQ(is_cam_recoding?"Started camera path recording":"Recording is stopped", 1000, 0, false);
-}
 
 if(GetAsyncKeyState(VK_NUMPAD6)&1){
 *timeScale=3.0;

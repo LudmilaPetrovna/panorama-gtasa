@@ -66,7 +66,7 @@ void restoreGravity();
 
 // game functions
 extern void addTwoStars();
-extern void MessageJumpQ(char *text, int time, unsigned short flag, bool addToPreviousBrief);
+extern void __cdecl MessageJumpQ(char *text, int time, unsigned short flag, char addToPreviousBrief);
 extern void forceWeatherNow(short weatherType);
 extern void __thiscall reportMissionAudioEvent(void *t, int id, CVector *coords);
 extern void __thiscall setEffectsMasterVolume(void *t, char volume);
