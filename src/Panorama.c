@@ -918,7 +918,7 @@ while(1){
 
 if(GetAsyncKeyState(VK_NUMPAD5)&1){
 is_cam_recoding^=1;
-MessageJumpQ(is_cam_recoding?"Started camera path recording":"Recording is stopped", 1000, 0, false);
+MessageJumpQ(is_cam_recoding?"Started camera path recording":"Recording is stopped", 50000, 0, false);
 }
 
 }
