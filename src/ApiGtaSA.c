@@ -118,7 +118,7 @@ if(*weatherNewType>=0){
 weatherWindynessForWeatherID[*weatherOldType]=val;
 }
 sprintf(screenMessage,"Windyness %.3f for weathers: %d, %d, %d",val,*weatherForcedType,*weatherNewType,*weatherOldType);
-MessageJumpQ(screenMessage, 1000, 0, false);
+//MessageJumpQ(screenMessage, 1000, 0, false);
 }
 
 void setAspectRatio(float aspect){
@@ -197,7 +197,7 @@ void rollTime(){
 *clockMinutes=drand_num(60.0);
 *clockSeconds=drand_num(60.0);
 sprintf(screenMessage,"Time: %02d:%02d:%02d",*clockHours,*clockMinutes,*clockSeconds);
-//MessageJumpQ(screenMessage, 10000, 0, false);
+MessageJumpQ(screenMessage, 10000, 0, false);
 }
 
 void flyTo(float tx, float ty, float tz, float heading, int interior, int need_detect_land){

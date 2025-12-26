@@ -13,11 +13,12 @@
 
 
 DWORD WINAPI Watchdog(LPVOID lpParam){
-Sleep(20000);
+Sleep(10000);
 memory512(0);
 if(*CTimer_m_FrameCounter<5){
 exit(0);
 }
+remove_annoing_tutorial();
 return 0;
 }
 
@@ -34,8 +35,8 @@ hooks_install();
 //memory512(0);
 CreateThread(NULL,0,MyASIThread,NULL,0,&dwTID);
 CreateThread(NULL,0,Watchdog,NULL,0,&dwTID);
-webmenu_start();
-start_file_rpc();
+//webmenu_start();
+//start_file_rpc();
 //remove_annoing_tutorial();
 //no_forbidden_territory();
 //setAspectRatio(1.777777777777777777);

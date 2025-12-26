@@ -82,7 +82,7 @@ int fov_find=0;
 
 //char *screensSource="v:\\Screenshots";
 //char *screensTmp="v:\\Screenshots";
-char *screensSource="v:\\Screenshots";
+//char *screensSource="v:\\Screenshots";
 char *panoRoot="v:\\Pano";
 
 
@@ -117,6 +117,7 @@ DeleteFile(path);
 }
 
 
+/*
 void waitForFile(char *outname){
 WIN32_FIND_DATA ffd;
 int ret;
@@ -135,7 +136,7 @@ return;
 Sleep(100);
 }
 }
-
+*/
 
 
 void precachePanoPlace(double sx, double sy, double sz){
@@ -149,12 +150,13 @@ int q;
 *darkness=100;
 *darknessEnable=1;
 setGameFPSLimit(105);
+int precache_frames=1000;
 
-for(q=0;q<300;q+=1){
+for(q=0;q<precache_frames;q+=1){
 if(GetAsyncKeyState(VK_F7)&1){return;}
 
-xrotth=(360.0*10.0*q/200.0)/180.0*M_PI;
-yrotth=(89.0-178.0*q/200.0)/180.0*M_PI;
+xrotth=(360.0*5.0*q/precache_frames)/180.0*M_PI;
+yrotth=(89.0-178.0*q/precache_frames)/180.0*M_PI;
 
 radius1=cos(yrotth)*sphereRadius;
 tz=sz+sin(yrotth)*sphereRadius;
@@ -167,6 +169,64 @@ Sleep(10);
 
 *darkness=0;
 *darknessEnable=0;
+
+}
+
+
+void timelapseScreenshots(){
+int place_id,weather_id,hour;
+void *cped=getPlayerCped();
+
+
+prepareFreeze();
+setDrawingDistance(8000.0);
+*CTheScripts__bDisplayHud=0;
+*CHud__bScriptDontDisplayRadar=1;
+cpedSetVisibility(cped, 0);
+
+place_id=1;
+weather_id=0;
+setGameFPSLimit(105);
+*timeScale=20.0;
+*timeScale=1.0;
+
+flyTo(places[place_id].x,places[place_id].y,places[place_id].z,places[place_id].heading,places[place_id].interior,0);
+precachePanoPlace(places[place_id].x,places[place_id].y,places[place_id].z+5.0);
+
+float headingTh=-places[place_id].heading/360.0*M_PI*2.0;
+float lookToX=sin(headingTh)*10.0+places[place_id].x;
+float lookToY=cos(headingTh)*10.0+places[place_id].y;
+float lookToZ=places[place_id].z+7.0;
+float fov=60.0;
+
+setCameraFromToFov(places[place_id].x,places[place_id].y,places[place_id].z+10.0,lookToX,lookToY,lookToZ,fov);
+
+*timeScale=0.000001;
+for(hour=0;hour<24;hour++){
+for(weather_id=0;weather_id<24;weather_id++){
+refreshFreeze();
+*clockHours=hour;
+*clockMinutes=0;
+*clockSeconds=0;
+*weatherForcedType=weather_id;
+*weatherNewType=weather_id;
+*weatherOldType=weather_id;
+setWindynessForCurrentWeather(0);
+
+int oldval=screenshoter.taken;
+sprintf(screenshoter.filename,"screenshot-place%d-weather%d-hour%d.png",place_id,weather_id,hour);
+screenshoter.delay=2;
+screenshoter.active=1;
+while(screenshoter.taken==oldval){ // wait to take screenshot
+Sleep(10);
+}
+screenshoter.active=0;
+}
+}
+
+restoreFreeze();
+MessageJumpQ("Timelapse done", 1000, 0, false);
+
 
 }
 
@@ -921,6 +981,36 @@ is_cam_recoding^=1;
 MessageJumpQ(is_cam_recoding?"Started camera path recording":"Recording is stopped", 50000, 0, false);
 }
 
+
+
+if(GetAsyncKeyState(VK_NUMPAD7)&1){
+timelapseScreenshots();
+}
+
+
+
+if(GetAsyncKeyState(VK_F6)&1){
+rollTime();
+}
+
+if(GetAsyncKeyState(VK_F7)&1){
+int weatherID=drand()*23.0;
+forceWeatherNow(weatherID);
+sprintf(tmp,"New weather ID: %d",weatherID);
+MessageJumpQ(tmp, 10000, 0, false);
+}
+
+if(GetAsyncKeyState(VK_F8)&1){
+CVector *cj_pos=getPlayerVector();
+do{
+cj_pos->x=drand()*6000.0-3000.0;
+cj_pos->y=drand()*6000.0-3000.0;
+cj_pos->z=findGroundZForCoordByFile(cj_pos->x,cj_pos->y)+1.0;
+} while(cj_pos->z<0.0);
+flyTo(drand()*5000.0-2500.0,drand()*5000.0-2500.0,1000.0,drand()*360.0,0,1);
+}
+
+
 }
 }
 
@@ -1119,31 +1209,6 @@ CPointLights__AddLight(
 }
 */
 
-if(GetAsyncKeyState(VK_F6)&1){
-rollTime();
-}
-
-if(GetAsyncKeyState(VK_F7)&1){
-int weatherID=drand()*23.0;
-forceWeatherNow(weatherID);
-sprintf(tmp,"New weather ID: %d",weatherID);
-MessageJumpQ(tmp, 10000, 0, false);
-}
-
-if(GetAsyncKeyState(VK_F8)&1){
-CVector *cj_pos=getPlayerVector();
-do{
-cj_pos->x=drand()*6000.0-3000.0;
-cj_pos->y=drand()*6000.0-3000.0;
-cj_pos->z=findGroundZForCoordByFile(cj_pos->x,cj_pos->y)+1.0;
-} while(cj_pos->z<0.0);
-continue;
-
-
-
-//flyTo(drand()*5000.0-2500.0,drand()*5000.0-2500.0,1000.0,drand()*360.0,0,1);
-
-}
 
 if(GetAsyncKeyState(VK_NUMPAD1)&1){
 flyTo(places[places_current].x,places[places_current].y,places[places_current].z,places[places_current].heading,places[places_current].interior,0);
@@ -1173,7 +1238,6 @@ if(GetAsyncKeyState(VK_NUMPAD6)&1){
 *timeScale=3.0;
 MessageJumpQ("time scale changed", 1000, 0, false);
 }
-
 
 /*
 if(GetAsyncKeyState(VK_NUMPAD9)&1){

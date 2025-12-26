@@ -19,7 +19,6 @@
 #include "log.h"
 
 
-void screenshoter_init();
 
 SCREENSHOTER screenshoter={0};
 
@@ -33,6 +32,8 @@ HANDLE g_hChildStd_IN_Rd=NULL;
 HANDLE g_hChildStd_IN_Wr=NULL;
 HANDLE g_hChildStd_OUT_Rd=NULL;
 HANDLE g_hChildStd_OUT_Wr=NULL;
+
+void screenshoter_init();
 
 void ffmpeg_spawn(){
 static char exec[1024];
@@ -129,8 +130,7 @@ if(screenshoter.delay>0){
 screenshoter.delay--;
 return;
 }
-if(screenshoter.delay!=0){return;}
-screenshoter.delay--;
+screenshoter.delay=0;
 
 logme("targets: %p / %p",renderTarget,pDestTarget);
 
@@ -191,6 +191,7 @@ if(filename){
 strcpy(screenshoter.filename,filename);
 }
 screenshoter.delay=delay;
+screenshoter.active=1;
 screenshoter.is_stream=is_stream;
 }
 
